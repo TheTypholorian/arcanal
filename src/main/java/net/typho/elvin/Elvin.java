@@ -26,7 +26,7 @@ import team.lodestar.lodestone.systems.particle.data.color.ColorParticleData;
 import java.awt.*;
 
 public class Elvin implements ModInitializer {
-	public static final String MOD_ID = "tungsten";
+	public static final String MOD_ID = "elvin";
 	public static final Color ASTRAL_BRIGHT = new Color(255, 208, 114), ASTRAL_DARK = new Color(229, 143, 57);
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
