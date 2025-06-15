@@ -1,0 +1,42 @@
+{
+	"schemaVersion": 1,
+	"id": "elvin",
+	"version": "${version}",
+	"name": "Embrace the Change",
+	"description": "Adds various elements from the world of Keeper of the Lost Cities to Minecraft",
+	"authors": [
+		"The Typhothanian"
+	],
+	"contact": {
+		"homepage": "https://typho.net/",
+		"sources": "https://github.com/TheTypholorian/elvin"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/elvin/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.typho.elvin.Elvin"
+		],
+		"client": [
+			"net.typho.elvin.ElvinClient"
+		]
+	},
+	"mixins": [
+		"elvin.mixins.json",
+		{
+			"config": "elvin.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*",
+		"lodestone": ">=1.6.2.2"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
