@@ -1,14 +1,9 @@
 package net.typho.cryptal.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.entity.attribute.ClampedEntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.typho.cryptal.Cryptal;
 
 import java.awt.*;
@@ -21,14 +16,11 @@ public class ManaBarRenderer implements HudRenderCallback {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        EntityAttributeInstance inst = client.player.getAttributeInstance(Cryptal.MANA_ATTRIBUTE);
-        assert inst != null;
-        float mana = (float) inst.getValue();
-        int maxMana = (int) ((ClampedEntityAttribute) inst.getAttribute()).getMaxValue();
+        float mana = Cryptal.getMana(client.player);
 
         int y = client.getWindow().getScaledHeight() / 2 - HEIGHT / 2;
 
-        int filled = (int) ((mana / maxMana) * HEIGHT);
+        int filled = (int) ((mana / 10) * HEIGHT);
 
         context.fill(X, y, X + WIDTH, y + HEIGHT, EMPTY.getRGB());
         context.fill(X, y + HEIGHT - filled, X + WIDTH, y + HEIGHT, FULL.getRGB());
@@ -42,7 +34,7 @@ public class ManaBarRenderer implements HudRenderCallback {
         );
         context.drawCenteredTextWithShadow(
                 client.textRenderer,
-                Text.literal((int) (mana / maxMana * 100) + "%"),
+                Text.literal((int) (mana / 10 * 100) + "%"),
                 X + WIDTH / 2,
                 y + HEIGHT + 16,
                 Color.WHITE.getRGB()

@@ -82,53 +82,54 @@ public class Astral implements Ability {
                 return false;
             }
 
-            Cryptal.LOGGER.info("Casting, client? " + world.isClient);
-
             Vec3d origin = player.getPos().add(0, player.getStandingEyeHeight(), 0);
             Vec3d look = player.getRotationVector();
-            float len = 512;
+            float len = 64;
 
             Vec3d target = origin.add(look.multiply(len));
             RaycastContext ctx = new RaycastContext(origin, target, RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, player);
             HitResult hit = world.raycast(ctx);
 
-            if (hit instanceof BlockHitResult block) {
-                Vec3d pos = hit.getPos();
-                Explosion e = new Astral.Shockwave(world, player, world.getDamageSources().magic(), new EntityExplosionBehavior(player), pos.x, pos.y, pos.z, 6, false, Explosion.DestructionType.DESTROY);
-                e.collectBlocksAndDamageEntities();
-                e.affectWorld(false);
+            if (hit instanceof BlockHitResult) {
+                target = hit.getPos();
 
-                len = (float) block.getPos().distanceTo(origin);
+                Cryptal.LOGGER.info("Hit at {}", target);
+
+                if (!world.isClient) {
+                    Explosion e = new Astral.Shockwave(world, player, world.getDamageSources().magic(), new EntityExplosionBehavior(player), target.x, target.y, target.z, 6, false, Explosion.DestructionType.DESTROY);
+                    e.collectBlocksAndDamageEntities();
+                    e.affectWorld(false);
+                } else {
+                    len = (float) target.distanceTo(origin);
+                }
             }
 
-            if (!world.isClient) {
-                return true;
-            }
+            if (world.isClient) {
+                ColorParticleData color = ColorParticleData.create(Astral.LIGHT, Astral.DARK).build();
 
-            ColorParticleData color = ColorParticleData.create(Astral.LIGHT, Astral.DARK).build();
+                WorldParticleBuilder builder = WorldParticleBuilder.create(LodestoneParticleRegistry.SPARKLE_PARTICLE)
+                        .setScaleData(GenericParticleData.create(0.5f, 0.1f, 0f).build())
+                        .setRandomMotion(0.01)
+                        .setColorData(color);
 
-            WorldParticleBuilder builder = WorldParticleBuilder.create(LodestoneParticleRegistry.SPARKLE_PARTICLE)
-                    .setScaleData(GenericParticleData.create(0.5f, 0.1f, 0f).build())
-                    .setRandomMotion(0.01)
-                    .setColorData(color);
+                Vec3d spawn = origin.add(look);
+                Vec3d inc = look.multiply(0.125f);
 
-            Vec3d spawn = origin.add(look);
-            Vec3d inc = look.multiply(0.125f);
+                for (float i = 1; i < len; i += 0.125f) {
+                    builder.setLifetime(40 + (int) (Math.random() * 20))
+                            .spawn(world, spawn.x, spawn.y, spawn.z);
+                    spawn = spawn.add(inc);
+                }
 
-            for (float i = 1; i < len; i += 0.25f) {
-                builder.setLifetime(40 + (int) (Math.random() * 20))
-                        .spawn(world, spawn.x, spawn.y, spawn.z);
-                spawn = spawn.add(inc);
-            }
+                builder = WorldParticleBuilder.create(LodestoneParticleRegistry.STAR_PARTICLE)
+                        .setScaleData(GenericParticleData.create(10f, 0f).build())
+                        .setRandomMotion(0.1)
+                        .setColorData(color)
+                        .setLifetime(40 + (int) (Math.random() * 20));
 
-            builder = WorldParticleBuilder.create(LodestoneParticleRegistry.STAR_PARTICLE)
-                    .setScaleData(GenericParticleData.create(10f, 0f).build())
-                    .setRandomMotion(0.1)
-                    .setColorData(color)
-                    .setLifetime(40 + (int) (Math.random() * 20));
-
-            for (int i = 0; i < 5; i++) {
-                builder.spawn(world, target.x, target.y, target.z);
+                for (int i = 0; i < 5; i++) {
+                    builder.spawn(world, target.x, target.y, target.z);
+                }
             }
 
             return true;

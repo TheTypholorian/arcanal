@@ -1,6 +1,11 @@
 package net.typho.cryptal.ability;
 
+import dev.onyxstudios.cca.api.v3.component.ComponentV3;
+import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.typho.cryptal.Cryptal;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -51,6 +56,34 @@ public interface Ability {
         @Override
         public Skill[] skills() {
             return new Skill[0];
+        }
+    }
+
+    class Component implements ComponentV3, AutoSyncedComponent {
+        private Ability ability = new None();
+        private final PlayerEntity parent;
+
+        public Component(PlayerEntity parent) {
+            this.parent = parent;
+        }
+
+        public Ability getAbility() {
+            return ability;
+        }
+
+        public void setAbility(Ability ability) {
+            this.ability = ability;
+            Cryptal.ABILITY_COMPONENT.sync(parent);
+        }
+
+        @Override
+        public void readFromNbt(@NotNull NbtCompound nbt) {
+            setAbility(fromNbt(nbt));
+        }
+
+        @Override
+        public void writeToNbt(@NotNull NbtCompound nbt) {
+            ability.toNbt(nbt);
         }
     }
 }

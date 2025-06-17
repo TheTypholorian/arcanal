@@ -20,6 +20,9 @@
 		],
 		"client": [
 			"net.typho.cryptal.CryptalClient"
+		],
+		"cardinal-components": [
+			"net.typho.cryptal.Cryptal"
 		]
 	},
 	"mixins": [
@@ -35,5 +38,11 @@
 		"java": ">=17",
 		"fabric-api": "*",
 		"lodestone": ">=1.6.2.2"
+	},
+	"custom": {
+		"cardinal-components": [
+			"cryptal:ability",
+			"cryptal:mana"
+		]
 	}
 }
