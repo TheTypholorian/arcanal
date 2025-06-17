@@ -16,8 +16,21 @@ public abstract class Skill {
         this.parent = parent;
     }
 
+    public Skill(Ability parent, NbtCompound nbt) {
+        this(parent);
+
+        NbtCompound data = nbt.getCompound(name());
+
+        if (data != null) {
+            if (data.contains("timer")) {
+                timer = data.getFloat("timer");
+            }
+        }
+    }
+
     public boolean canCast() {
-        return timer <= 0;
+        //return timer <= 0;
+        return true;
     }
 
     public float untilCanCast() {
@@ -25,7 +38,7 @@ public abstract class Skill {
     }
 
     public void tick(float tickDelta) {
-        timer -= tickDelta;
+        timer = Math.max(0, timer - tickDelta);
     }
 
     public abstract float cost();
@@ -34,18 +47,22 @@ public abstract class Skill {
 
     public abstract String name();
 
-    public void cast(World world, PlayerEntity player) {
+    public boolean cast(World world, PlayerEntity player) {
+        if (!canCast()) {
+            return false;
+        }
+
         if (!world.isClient) {
             timer = cooldown();
         }
+
+        return true;
     }
 
     public NbtCompound toNbt() {
         NbtCompound nbt = new NbtCompound();
 
-        if (!canCast()) {
-            nbt.putFloat("untilCanCast", untilCanCast());
-        }
+        nbt.putFloat("timer", untilCanCast());
 
         return nbt;
     }

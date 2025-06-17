@@ -1,11 +1,6 @@
 package net.typho.cryptal.ability;
 
-import dev.onyxstudios.cca.api.v3.component.ComponentV3;
-import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
-import dev.onyxstudios.cca.api.v3.entity.PlayerComponent;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import oshi.driver.windows.wmi.OhmHardware;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,10 +9,6 @@ import java.util.function.Function;
 
 public interface Ability {
     Map<String, Function<NbtCompound, Ability>> FROM_NBT_MAP = new LinkedHashMap<>();
-
-    PlayerEntity parent();
-
-    void parent(PlayerEntity player);
 
     String name();
 
@@ -52,18 +43,6 @@ public interface Ability {
     }
 
     class None implements Ability {
-        private PlayerEntity parent;
-
-        @Override
-        public PlayerEntity parent() {
-            return parent;
-        }
-
-        @Override
-        public void parent(PlayerEntity player) {
-            parent = player;
-        }
-
         @Override
         public String name() {
             return "none";
