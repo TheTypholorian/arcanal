@@ -1,31 +1,31 @@
 {
 	"schemaVersion": 1,
-	"id": "elvin",
+	"id": "cryptal",
 	"version": "${version}",
-	"name": "Embrace the Change",
-	"description": "Embrace the Change, and experience Keeper of the Lost Cities' world in Minecraft!",
+	"name": "Cryptal",
+	"description": "A mod about somewhat balanced superpowers",
 	"authors": [
 		"The Typhothanian"
 	],
 	"contact": {
 		"homepage": "https://typho.net/",
-		"sources": "https://github.com/TheTypholorian/elvin"
+		"sources": "https://github.com/TheTypholorian/cryptal"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/elvin/icon.png",
+	"icon": "assets/cryptal/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"net.typho.elvin.Elvin"
+			"net.typho.cryptal.Cryptal"
 		],
 		"client": [
-			"net.typho.elvin.ElvinClient"
+			"net.typho.cryptal.CryptalClient"
 		]
 	},
 	"mixins": [
-		"elvin.mixins.json",
+		"cryptal.mixins.json",
 		{
-			"config": "elvin.client.mixins.json",
+			"config": "cryptal.client.mixins.json",
 			"environment": "client"
 		}
 	],
@@ -35,8 +35,5 @@
 		"java": ">=17",
 		"fabric-api": "*",
 		"lodestone": ">=1.6.2.2"
-	},
-	"suggests": {
-		"another-mod": "*"
 	}
 }

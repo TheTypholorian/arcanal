@@ -1,23 +1,27 @@
-package net.typho.elvin.gui;
+package net.typho.cryptal.gui;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.entity.attribute.ClampedEntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.text.Text;
-import net.typho.elvin.Elvin;
+import net.minecraft.util.Identifier;
+import net.typho.cryptal.Cryptal;
 
 import java.awt.*;
 
-public class ManaBarRenderer {
+public class ManaBarRenderer implements HudRenderCallback {
     public static final Color FULL = new Color(38, 146, 255), EMPTY = new Color(19, 38, 76);
     private static final int X = 10, WIDTH = 10, HEIGHT = 100;
 
-    public static void onHudRender(DrawContext context, float tickDelta) {
+    public void onHudRender(DrawContext context, float tickDelta) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        EntityAttributeInstance inst = client.player.getAttributeInstance(Elvin.MANA_ATTRIBUTE);
+        EntityAttributeInstance inst = client.player.getAttributeInstance(Cryptal.MANA_ATTRIBUTE);
         assert inst != null;
         float mana = (float) inst.getValue();
         int maxMana = (int) ((ClampedEntityAttribute) inst.getAttribute()).getMaxValue();
