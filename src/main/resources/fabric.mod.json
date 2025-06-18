@@ -42,7 +42,8 @@
 	"custom": {
 		"cardinal-components": [
 			"cryptal:ability",
-			"cryptal:mana"
+			"cryptal:mana",
+			"cryptal:can_fly"
 		]
 	}
 }

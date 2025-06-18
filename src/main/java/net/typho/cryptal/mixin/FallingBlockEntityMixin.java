@@ -20,7 +20,7 @@ public class FallingBlockEntityMixin {
     )
     private void onDestroyedOnLandingReplace(CallbackInfo ci) {
         FallingBlockEntity block = (FallingBlockEntity) (Object) this;
-        block.setVelocity(new Vec3d(block.getX() - block.prevX + Math.random() - 0.5, block.getY() - block.prevY + Math.random() - 0.5, block.getZ() - block.prevZ + Math.random() - 0.5));
+        block.setVelocity(new Vec3d(Math.random() * 0.5 - 0.25, Math.random() * 0.5 - 0.25, Math.random() * 0.5 - 0.25));
         ci.cancel();
     }
 }

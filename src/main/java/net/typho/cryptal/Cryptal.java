@@ -35,8 +35,15 @@ public class Cryptal implements ModInitializer, EntityComponentInitializer {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	public static final ComponentKey<ManaComponent> MANA_COMPONENT = ComponentRegistryV3.INSTANCE.getOrCreate(new Identifier(MOD_ID, "mana"), ManaComponent.class);
 	public static final ComponentKey<Ability.Component> ABILITY_COMPONENT = ComponentRegistryV3.INSTANCE.getOrCreate(new Identifier(MOD_ID, "ability"), Ability.Component.class);
+	public static final ComponentKey<ManaComponent> MANA_COMPONENT = ComponentRegistryV3.INSTANCE.getOrCreate(new Identifier(MOD_ID, "mana"), ManaComponent.class);
+
+	@Override
+	public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
+		registry.registerForPlayers(ABILITY_COMPONENT, Ability.Component::new, RespawnCopyStrategy.ALWAYS_COPY);
+		registry.registerForPlayers(MANA_COMPONENT, ManaComponent::new, RespawnCopyStrategy.ALWAYS_COPY);
+		registry.registerForPlayers(Skill.Flying.CAN_FLY_COMPONENT, Skill.Flying.Component::new, RespawnCopyStrategy.ALWAYS_COPY);
+	}
 
 	public static Ability getAbility(PlayerEntity player) {
 		return player.getComponent(ABILITY_COMPONENT).getAbility();
@@ -54,12 +61,6 @@ public class Cryptal implements ModInitializer, EntityComponentInitializer {
 		player.getComponent(MANA_COMPONENT).setMana(mana);
 	}
 
-	@Override
-	public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
-		registry.registerForPlayers(ABILITY_COMPONENT, Ability.Component::new, RespawnCopyStrategy.ALWAYS_COPY);
-		registry.registerForPlayers(MANA_COMPONENT, ManaComponent::new, RespawnCopyStrategy.ALWAYS_COPY);
-	}
-
 	public static final SoundEvent ASTRAL_BOOM_SOUND = sound("astral_boom");
 
 	private static SoundEvent sound(String name) {
@@ -69,8 +70,7 @@ public class Cryptal implements ModInitializer, EntityComponentInitializer {
 
 	@Override
 	public void onInitialize() {
-		Ability.FROM_NBT_MAP.put("astral", Astral::new);
-		Ability.FROM_NBT_MAP.put("none", nbt -> new Ability.None());
+		Ability.put(Ability.None.INSTANCE, Astral.INSTANCE);
 		ServerPlayNetworking.registerGlobalReceiver(
 				Skill.CAST_TO_SERVER_PACKET_ID,
 				(server, player, handler, buf, responseSender) -> {
@@ -101,7 +101,7 @@ public class Cryptal implements ModInitializer, EntityComponentInitializer {
 						.then(
 								argument("type", StringArgumentType.word())
 										.suggests((ctx, builder) -> {
-											for (String ability : Ability.FROM_NBT_MAP.keySet()) {
+											for (String ability : Ability.ABILITY_MAP.keySet()) {
 												builder.suggest(ability);
 											}
 
@@ -111,9 +111,7 @@ public class Cryptal implements ModInitializer, EntityComponentInitializer {
 											String type = StringArgumentType.getString(ctx, "type");
 
 											try {
-												NbtCompound nbt = new NbtCompound();
-												nbt.putString("name", type);
-												setAbility(Objects.requireNonNull(ctx.getSource().getPlayer()), Ability.fromNbt(nbt));
+												setAbility(Objects.requireNonNull(ctx.getSource().getPlayer()), Ability.ABILITY_MAP.get(type));
 												return 1;
 											} catch (NullPointerException e) {
 												ctx.getSource().sendFeedback(

@@ -12,33 +12,52 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.typho.cryptal.ability.Ability;
-import net.typho.cryptal.ability.Astral;
 import net.typho.cryptal.ability.Skill;
 import net.typho.cryptal.gui.ManaBarRenderer;
 import org.lwjgl.glfw.GLFW;
 
 public class CryptalClient implements ClientModInitializer {
-	public static final String ASTRAL_KEY_CATEGORY = "key.category" + Cryptal.MOD_ID + ".astral";
-	public static final KeyBinding ASTRAL_BOOM_KEYBINDING = KeyBindingHelper.registerKeyBinding(new KeyBinding("key." + Cryptal.MOD_ID + ".astral.boom", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_C, ASTRAL_KEY_CATEGORY));
+	public static final String KEY_CATEGORY = "key.category." + Cryptal.MOD_ID;
+	public static final KeyBinding MAJOR_KEYBINDING = KeyBindingHelper.registerKeyBinding(new KeyBinding("key." + Cryptal.MOD_ID + ".major", InputUtil.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_4, KEY_CATEGORY));
+	public static final KeyBinding MINOR_KEYBINDING = KeyBindingHelper.registerKeyBinding(new KeyBinding("key." + Cryptal.MOD_ID + ".minor", InputUtil.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_5, KEY_CATEGORY));
 
 	@Override
 	public void onInitializeClient() {
 		HudRenderCallback.EVENT.register(new ManaBarRenderer());
 
-		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			while (ASTRAL_BOOM_KEYBINDING.wasPressed()) {
-				assert client.player != null;
+		ClientTickEvents.START_CLIENT_TICK.register(client -> {
+			if (client.player != null) {
 				Ability ability = Cryptal.getAbility(client.player);
 
-				if (ability instanceof Astral astral) {
-					Skill skill = astral.skills[0];
+				if (ability != null) {
+					while (MAJOR_KEYBINDING.wasPressed()) {
+						Skill skill = ability.majorSkill();
 
-					if (skill.canCast(client.player)) {
-						PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+						if (skill != null) {
+							PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+							buf.writeString(skill.name());
+							ClientPlayNetworking.send(Skill.CAST_TO_SERVER_PACKET_ID, buf);
+						}
+					}
 
-						buf.writeString(skill.name());
+					while (MINOR_KEYBINDING.wasPressed()) {
+						Skill skill = ability.minorSkill();
 
-						ClientPlayNetworking.send(Skill.CAST_TO_SERVER_PACKET_ID, buf);
+						if (skill != null) {
+							PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+							buf.writeString(skill.name());
+							ClientPlayNetworking.send(Skill.CAST_TO_SERVER_PACKET_ID, buf);
+						}
+					}
+
+					if (InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_SPACE)) {
+						Skill skill = ability.passiveSkill();
+
+						if (skill != null) {
+							PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+							buf.writeString(skill.name());
+							ClientPlayNetworking.send(Skill.CAST_TO_SERVER_PACKET_ID, buf);
+						}
 					}
 				}
 			}
@@ -61,6 +80,5 @@ public class CryptalClient implements ClientModInitializer {
 					});
 				}
 		);
-
 	}
 }

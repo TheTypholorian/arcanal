@@ -10,7 +10,7 @@ import java.awt.*;
 
 public class ManaBarRenderer implements HudRenderCallback {
     public static final Color FULL = new Color(38, 146, 255), EMPTY = new Color(19, 38, 76);
-    private static final int X = 10, WIDTH = 10, HEIGHT = 100;
+    private static final int Y = 15, WIDTH = 100, HEIGHT = 10;
 
     public void onHudRender(DrawContext context, float tickDelta) {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -18,25 +18,19 @@ public class ManaBarRenderer implements HudRenderCallback {
 
         float mana = Cryptal.getMana(client.player);
 
-        int y = client.getWindow().getScaledHeight() / 2 - HEIGHT / 2;
+        int x = client.getWindow().getScaledWidth() / 2 - WIDTH / 2;
+        int y = client.getWindow().getScaledHeight() / 2 + Y;
 
         int filled = (int) ((mana / 10) * HEIGHT);
 
-        context.fill(X, y, X + WIDTH, y + HEIGHT, EMPTY.getRGB());
-        context.fill(X, y + HEIGHT - filled, X + WIDTH, y + HEIGHT, FULL.getRGB());
+        context.fill(x, y, x + WIDTH, y + HEIGHT, EMPTY.getRGB());
+        context.fill(x, y + HEIGHT, x + filled, y + HEIGHT, FULL.getRGB());
 
         context.drawCenteredTextWithShadow(
                 client.textRenderer,
-                Text.literal("Mana"),
-                X + WIDTH / 2,
-                y + HEIGHT + 6,
-                Color.WHITE.getRGB()
-        );
-        context.drawCenteredTextWithShadow(
-                client.textRenderer,
-                Text.literal((int) (mana / 10 * 100) + "%"),
-                X + WIDTH / 2,
-                y + HEIGHT + 16,
+                Text.literal("Mana (" + (int) (mana / 10 * 100) + "%)"),
+                x + WIDTH / 2,
+                y + HEIGHT / 2,
                 Color.WHITE.getRGB()
         );
     }

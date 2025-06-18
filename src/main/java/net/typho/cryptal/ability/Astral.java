@@ -7,7 +7,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.hit.BlockHitResult;
@@ -30,16 +29,59 @@ import java.awt.*;
 import java.util.List;
 
 public class Astral implements Ability {
+    public static final Astral INSTANCE = new Astral();
     public static final Color LIGHT = new Color(255, 208, 114), DARK = new Color(229, 143, 57);
+    public static final ColorParticleData COLOR_DATA = ColorParticleData.create(Astral.LIGHT, Astral.DARK).build();
 
-    public final Skill[] skills = new Skill[1];
-
-    public Astral() {
-        skills[0] = new ShockwaveSkill(this);
+    public static WorldParticleBuilder sparkles() {
+        return WorldParticleBuilder.create(LodestoneParticleRegistry.TWINKLE_PARTICLE)
+                .setRandomMotion(0.01)
+                .setColorData(COLOR_DATA);
     }
 
-    public Astral(NbtCompound nbt) {
-        skills[0] = new ShockwaveSkill(this, nbt);
+    public static WorldParticleBuilder stars() {
+        return WorldParticleBuilder.create(LodestoneParticleRegistry.STAR_PARTICLE)
+                .setRandomMotion(0.1)
+                .setColorData(COLOR_DATA);
+    }
+
+    public static WorldParticleBuilder flying() {
+        return WorldParticleBuilder.create(LodestoneParticleRegistry.TWINKLE_PARTICLE)
+                .setRandomMotion(0.1)
+                .setRandomOffset(0.5)
+                .setColorData(COLOR_DATA);
+    }
+
+    public final Skill[] skills = new Skill[2];
+
+    public Astral() {
+        skills[0] = new ShockwaveSkill();
+        skills[1] = new Skill.Flying() {
+            @Override
+            public WorldParticleBuilder particles() {
+                return flying().setScaleData(GenericParticleData.create(0.25f, 0.1f, 0f).build());
+            }
+
+            @Override
+            public int numParticles() {
+                return 2;
+            }
+
+            @Override
+            public float force() {
+                return 0.1f;
+            }
+        };
+    }
+
+    @Override
+    public Skill majorSkill() {
+        return skills[0];
+    }
+
+    @Override
+    public Skill passiveSkill() {
+        return skills[1];
     }
 
     @Override
@@ -53,22 +95,9 @@ public class Astral implements Ability {
     }
 
     public static class ShockwaveSkill extends Skill {
-        public ShockwaveSkill(Ability parent) {
-            super(parent);
-        }
-
-        public ShockwaveSkill(Ability parent, NbtCompound nbt) {
-            super(parent, nbt);
-        }
-
         @Override
         public float cost() {
             return 3;
-        }
-
-        @Override
-        public float cooldown() {
-            return 4;
         }
 
         @Override
@@ -93,10 +122,8 @@ public class Astral implements Ability {
             if (hit instanceof BlockHitResult) {
                 target = hit.getPos();
 
-                Cryptal.LOGGER.info("Hit at {}", target);
-
                 if (!world.isClient) {
-                    Explosion e = new Astral.Shockwave(world, player, world.getDamageSources().magic(), new EntityExplosionBehavior(player), target.x, target.y, target.z, 6, false, Explosion.DestructionType.DESTROY);
+                    Explosion e = new Astral.Shockwave(world, player, world.getDamageSources().magic(), new EntityExplosionBehavior(player), target.x, target.y, target.z, 8, false, Explosion.DestructionType.DESTROY);
                     e.collectBlocksAndDamageEntities();
                     e.affectWorld(false);
                 } else {
@@ -105,30 +132,24 @@ public class Astral implements Ability {
             }
 
             if (world.isClient) {
-                ColorParticleData color = ColorParticleData.create(Astral.LIGHT, Astral.DARK).build();
-
-                WorldParticleBuilder builder = WorldParticleBuilder.create(LodestoneParticleRegistry.SPARKLE_PARTICLE)
-                        .setScaleData(GenericParticleData.create(0.5f, 0.1f, 0f).build())
-                        .setRandomMotion(0.01)
-                        .setColorData(color);
-
                 Vec3d spawn = origin.add(look);
                 Vec3d inc = look.multiply(0.125f);
 
+                WorldParticleBuilder sparkles = sparkles()
+                        .setScaleData(GenericParticleData.create(0.5f, 0.1f, 0f).build());
+
                 for (float i = 1; i < len; i += 0.125f) {
-                    builder.setLifetime(40 + (int) (Math.random() * 20))
+                    sparkles.setLifetime(40 + (int) (Math.random() * 20))
                             .spawn(world, spawn.x, spawn.y, spawn.z);
                     spawn = spawn.add(inc);
                 }
 
-                builder = WorldParticleBuilder.create(LodestoneParticleRegistry.STAR_PARTICLE)
-                        .setScaleData(GenericParticleData.create(10f, 0f).build())
-                        .setRandomMotion(0.1)
-                        .setColorData(color)
-                        .setLifetime(40 + (int) (Math.random() * 20));
+                WorldParticleBuilder stars = stars()
+                        .setScaleData(GenericParticleData.create(5f, 2f, 0f).build());
 
                 for (int i = 0; i < 5; i++) {
-                    builder.spawn(world, target.x, target.y, target.z);
+                    stars.setLifetime(40 + (int) (Math.random() * 20))
+                            .spawn(world, target.x, target.y, target.z);
                 }
             }
 
@@ -179,7 +200,7 @@ public class Astral implements Ability {
 
         @Override
         public void affectWorld(boolean particles) {
-            if (world.isClient) {
+            if (!world.isClient) {
                 world.playSound(
                         x,
                         y,
@@ -190,33 +211,31 @@ public class Astral implements Ability {
                         (1f + (world.random.nextFloat() - world.random.nextFloat()) * 0.2f) * 0.7f,
                         false
                 );
-            } else {
+
                 boolean bl = this.shouldDestroy();
                 if (particles) {
                     if (!(power < 2) && bl) {
-                        this.world.addParticle(ParticleTypes.EXPLOSION_EMITTER, this.x, this.y, this.z, 1.0, 0.0, 0.0);
+                        this.world.addParticle(ParticleTypes.EXPLOSION_EMITTER, this.x, this.y, this.z, 1, 0, 0);
                     } else {
-                        this.world.addParticle(ParticleTypes.EXPLOSION, this.x, this.y, this.z, 1.0, 0.0, 0.0);
+                        this.world.addParticle(ParticleTypes.EXPLOSION, this.x, this.y, this.z, 1, 0, 0);
                     }
                 }
 
                 if (bl) {
                     Entity cause = getCausingEntity();
 
-                    for (BlockPos pos : getAffectedBlocks()) {
-                        BlockState state = world.getBlockState(pos);
+                    if (cause != null) {
+                        for (BlockPos pos : getAffectedBlocks()) {
+                            BlockState state = world.getBlockState(pos);
 
-                        if (state.isAir()) {
-                            continue;
-                        }
+                            if (state.isAir()) {
+                                continue;
+                            }
 
-                        world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_ALL);
+                            world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_ALL);
 
-                        FallingBlockEntity fall = FallingBlockEntity.spawnFromBlock(world, pos, state);
+                            FallingBlockEntity fall = FallingBlockEntity.spawnFromBlock(world, pos, state);
 
-                        fall.setGlowing(true);
-
-                        if (cause != null) {
                             fall.setVelocity(new Vec3d(
                                     cause.getX() - fall.getX() + world.getRandom().nextFloat() * 4 - 2,
                                     cause.getY() - fall.getY() + 3 + world.getRandom().nextFloat() * 4 - 2,

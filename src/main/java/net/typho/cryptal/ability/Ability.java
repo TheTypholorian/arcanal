@@ -9,15 +9,31 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
 
 public interface Ability {
-    Map<String, Function<NbtCompound, Ability>> FROM_NBT_MAP = new LinkedHashMap<>();
+    Map<String, Ability> ABILITY_MAP = new LinkedHashMap<>();
+
+    static void put(Ability... abilities) {
+        for (Ability ability : abilities) {
+            ABILITY_MAP.put(ability.name(), ability);
+        }
+    }
 
     String name();
 
     Skill[] skills();
+
+    default Skill majorSkill() {
+        return null;
+    }
+
+    default Skill minorSkill() {
+        return null;
+    }
+
+    default Skill passiveSkill() {
+        return null;
+    }
 
     default Skill getSkill(String name) {
         for (Skill skill : skills()) {
@@ -29,25 +45,9 @@ public interface Ability {
         return null;
     }
 
-    default NbtCompound toNbt(NbtCompound nbt) {
-        nbt.putString("name", name());
-
-        NbtCompound skills = new NbtCompound();
-
-        for (Skill skill : skills()) {
-            if (skill != null) {
-                skills.put(skill.name(), skill.toNbt());
-            }
-        }
-
-        return nbt;
-    }
-
-    static Ability fromNbt(NbtCompound nbt) {
-        return Objects.requireNonNull(FROM_NBT_MAP.get(nbt.getString("name")), () -> "No ability of name " + nbt.getString("name")).apply(nbt);
-    }
-
     class None implements Ability {
+        public static final None INSTANCE = new None();
+
         @Override
         public String name() {
             return "none";
@@ -60,7 +60,7 @@ public interface Ability {
     }
 
     class Component implements ComponentV3, AutoSyncedComponent {
-        private Ability ability = new None();
+        private Ability ability = None.INSTANCE;
         private final PlayerEntity parent;
 
         public Component(PlayerEntity parent) {
@@ -72,18 +72,18 @@ public interface Ability {
         }
 
         public void setAbility(Ability ability) {
-            this.ability = ability;
+            this.ability = ability == null ? None.INSTANCE : ability;
             Cryptal.ABILITY_COMPONENT.sync(parent);
         }
 
         @Override
         public void readFromNbt(@NotNull NbtCompound nbt) {
-            setAbility(fromNbt(nbt));
+            setAbility(ABILITY_MAP.get(nbt.getString("ability")));
         }
 
         @Override
         public void writeToNbt(@NotNull NbtCompound nbt) {
-            ability.toNbt(nbt);
+            nbt.putString("ability", ability.name());
         }
     }
 }
