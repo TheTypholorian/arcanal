@@ -12,17 +12,15 @@ public class FallingBlockEntityMixin {
     @Inject(
             method = "tick",
             at = @At(
-                    value  = "INVOKE",
+                    value = "INVOKE",
                     target = "Lnet/minecraft/entity/FallingBlockEntity;discard()V",
-                    ordinal = 2
+                    ordinal = 3
             ),
             cancellable = true
     )
     private void onDestroyedOnLandingReplace(CallbackInfo ci) {
         FallingBlockEntity block = (FallingBlockEntity) (Object) this;
-
         block.setVelocity(new Vec3d(block.getX() - block.prevX + Math.random() - 0.5, block.getY() - block.prevY + Math.random() - 0.5, block.getZ() - block.prevZ + Math.random() - 0.5));
-
         ci.cancel();
     }
 }
