@@ -89,11 +89,11 @@ public class Astral implements Ability {
     @Override
     public void clientTick(ClientWorld world, ClientPlayerEntity player) {
         while (ArcanalClient.MAJOR_KEYBINDING.wasPressed()) {
-            skills[0].cast(world, player);
+            skills[0].castToServer();
         }
 
         while (ArcanalClient.MINOR_KEYBINDING.wasPressed()) {
-            skills[1].cast(world, player);
+            skills[1].castToServer();
         }
     }
 

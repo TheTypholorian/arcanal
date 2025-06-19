@@ -37,16 +37,18 @@ public abstract class Skill {
 
     public abstract String name();
 
+    public void castToServer() {
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeString(name());
+        ClientPlayNetworking.send(CAST_TO_SERVER_PACKET_ID, buf);
+    }
+
     public boolean cast(World world, PlayerEntity player) {
         if (!canCast(player)) {
             return false;
         }
 
-        if (world.isClient) {
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeString(name());
-            ClientPlayNetworking.send(CAST_TO_SERVER_PACKET_ID, buf);
-        } else {
+        if (!world.isClient) {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeString(name());
             buf.writeInt(player.getId());
