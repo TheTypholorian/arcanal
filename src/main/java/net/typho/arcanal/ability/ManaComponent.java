@@ -1,4 +1,4 @@
-package net.typho.cryptal.ability;
+package net.typho.arcanal.ability;
 
 import dev.onyxstudios.cca.api.v3.component.ComponentV3;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
@@ -6,7 +6,7 @@ import dev.onyxstudios.cca.api.v3.component.tick.ServerTickingComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.MathHelper;
-import net.typho.cryptal.Cryptal;
+import net.typho.arcanal.Arcanal;
 import org.jetbrains.annotations.NotNull;
 
 public class ManaComponent implements ComponentV3, AutoSyncedComponent, ServerTickingComponent {
@@ -23,7 +23,7 @@ public class ManaComponent implements ComponentV3, AutoSyncedComponent, ServerTi
 
     public void setMana(float mana) {
         this.mana = MathHelper.clamp(mana, 0, 10);
-        Cryptal.MANA_COMPONENT.sync(parent);
+        Arcanal.MANA_COMPONENT.sync(parent);
     }
 
     @Override

@@ -1,0 +1,7 @@
+{
+  "exhaustion": 0,
+  "message_id": "arcanal.solar_flare",
+  "scaling": "never",
+  "effects": "burning",
+  "death_message_type": "default"
+}

@@ -1,36 +1,32 @@
 {
 	"schemaVersion": 1,
-	"id": "cryptal",
+	"id": "arcanal",
 	"version": "${version}",
-	"name": "Cryptal",
+	"name": "Arcanal",
 	"description": "A mod about somewhat balanced superpowers",
 	"authors": [
 		"The Typhothanian"
 	],
 	"contact": {
 		"homepage": "https://typho.net/",
-		"sources": "https://github.com/TheTypholorian/cryptal"
+		"sources": "https://github.com/TheTypholorian/arcanal"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/cryptal/icon.png",
+	"icon": "assets/arcanal/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"net.typho.cryptal.Cryptal"
+			"net.typho.arcanal.Arcanal"
 		],
 		"client": [
-			"net.typho.cryptal.CryptalClient"
+			"net.typho.arcanal.ArcanalClient"
 		],
 		"cardinal-components": [
-			"net.typho.cryptal.Cryptal"
+			"net.typho.arcanal.Arcanal"
 		]
 	},
 	"mixins": [
-		"cryptal.mixins.json",
-		{
-			"config": "cryptal.client.mixins.json",
-			"environment": "client"
-		}
+		"arcanal.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.16.14",
@@ -41,9 +37,8 @@
 	},
 	"custom": {
 		"cardinal-components": [
-			"cryptal:ability",
-			"cryptal:mana",
-			"cryptal:can_fly"
+			"arcanal:ability",
+			"arcanal:mana"
 		]
 	}
 }

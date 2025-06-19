@@ -1,4 +1,4 @@
-package net.typho.cryptal.mixin;
+package net.typho.arcanal.mixin;
 
 import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.util.math.Vec3d;

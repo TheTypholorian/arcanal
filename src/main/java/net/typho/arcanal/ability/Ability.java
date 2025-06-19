@@ -1,10 +1,13 @@
-package net.typho.cryptal.ability;
+package net.typho.arcanal.ability;
 
 import dev.onyxstudios.cca.api.v3.component.ComponentV3;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.typho.cryptal.Cryptal;
+import net.minecraft.world.World;
+import net.typho.arcanal.Arcanal;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
@@ -23,17 +26,7 @@ public interface Ability {
 
     Skill[] skills();
 
-    default Skill majorSkill() {
-        return null;
-    }
-
-    default Skill minorSkill() {
-        return null;
-    }
-
-    default Skill passiveSkill() {
-        return null;
-    }
+    void clientTick(ClientWorld world, ClientPlayerEntity player);
 
     default Skill getSkill(String name) {
         for (Skill skill : skills()) {
@@ -47,6 +40,10 @@ public interface Ability {
 
     class None implements Ability {
         public static final None INSTANCE = new None();
+
+        @Override
+        public void clientTick(ClientWorld world, ClientPlayerEntity player) {
+        }
 
         @Override
         public String name() {
@@ -73,7 +70,7 @@ public interface Ability {
 
         public void setAbility(Ability ability) {
             this.ability = ability == null ? None.INSTANCE : ability;
-            Cryptal.ABILITY_COMPONENT.sync(parent);
+            Arcanal.ABILITY_COMPONENT.sync(parent);
         }
 
         @Override
