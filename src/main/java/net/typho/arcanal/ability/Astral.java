@@ -104,13 +104,18 @@ public class Astral implements Ability {
     @Override
     public void onAttack(PlayerEntity attacker, Entity target) {
         if (target instanceof LivingEntity living) {
-            living.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 100, 0, false, false, true));
+            living.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 30, 0, false, false, true));
         }
     }
 
     @Override
     public Text getDeathMessage(LivingEntity killed, LivingEntity killer) {
         return killed.getDisplayName().copy().append(Text.literal(" flew too close to the sun"));
+    }
+
+    @Override
+    public boolean extraGlowingDamage() {
+        return true;
     }
 
     public static class ShockwaveSkill extends Skill {
@@ -315,7 +320,7 @@ public class Astral implements Ability {
                 for (LivingEntity target : pull) {
                     target.setVelocity(player.getPos().subtract(target.getEyePos()).normalize());
                     target.velocityModified = true;
-                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 10, 0, false, false, true));
+                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 30, 0, false, false, true));
 
                     if (target instanceof PlayerEntity steal) {
                         float targetMana = Arcanal.getMana(steal);

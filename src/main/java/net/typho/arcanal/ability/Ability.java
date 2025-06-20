@@ -47,6 +47,10 @@ public interface Ability {
         return null;
     }
 
+    default boolean extraGlowingDamage() {
+        return false;
+    }
+
     class None implements Ability {
         public static final None INSTANCE = new None();
 
