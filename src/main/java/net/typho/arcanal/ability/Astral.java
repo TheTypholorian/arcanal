@@ -7,16 +7,17 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FallingBlockEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.Text;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
-import net.minecraft.world.explosion.EntityExplosionBehavior;
 import net.minecraft.world.explosion.Explosion;
 import net.minecraft.world.explosion.ExplosionBehavior;
 import net.typho.arcanal.Arcanal;
@@ -53,12 +54,12 @@ public class Astral implements Ability {
 
     public Astral() {
         skills[0] = new ShockwaveSkill();
-        skills[1] = new Skill.Flamethrower() {
+        skills[1] = new Skill.Shotgun() {
             @Override
             public WorldParticleBuilder particles() {
                 return WorldParticleBuilder.create(LodestoneParticleRegistry.TWINKLE_PARTICLE)
-                        .setRandomMotion(0.25)
-                        .setRandomOffset(0.5)
+                        .setRandomMotion(0.15)
+                        .setRandomOffset(0.25)
                         .setScaleData(GenericParticleData.create(0.5f, 0.2f, 0f).build())
                         .setSpinData(SpinParticleData.create(0.1f, 0f).build())
                         .setColorData(COLOR_DATA);
@@ -66,24 +67,14 @@ public class Astral implements Ability {
 
             @Override
             public int numParticles() {
-                return 20;
-            }
-
-            @Override
-            public DamageSource damageSource(World world, PlayerEntity player) {
-                return new DamageSource(Arcanal.damageSource(world, Arcanal.SOLAR_FLARE_DAMAGE_KEY), player);
-            }
-
-            @Override
-            public int fireSeconds() {
-                return 20;
-            }
-
-            @Override
-            public int fireDamage() {
-                return 6;
+                return 5;
             }
         };
+    }
+
+    @Override
+    public Text getDeathMessage(LivingEntity killed, LivingEntity killer) {
+        return killed.getDisplayName().copy().append(Text.literal(" flew too close to the sun"));
     }
 
     @Override
@@ -135,12 +126,12 @@ public class Astral implements Ability {
             target = hit.getPos();
 
             if (!world.isClient) {
-                Explosion e = new Astral.Shockwave(world, player, world.getDamageSources().magic(), new EntityExplosionBehavior(player), target.x, target.y, target.z, 8, false, Explosion.DestructionType.DESTROY);
+                Explosion e = new Astral.Shockwave(world, player, target.x, target.y, target.z, 8, true, Explosion.DestructionType.DESTROY);
                 e.collectBlocksAndDamageEntities();
                 e.affectWorld(false);
             } else {
                 len = (float) target.distanceTo(origin);
-                Astral.Shockwave.boom(world, target.x, target.y, target.z);
+                Astral.Shockwave.playSound(world, target.x, target.y, target.z);
             }
 
             if (world.isClient) {
@@ -210,7 +201,7 @@ public class Astral implements Ability {
             this.power = power;
         }
 
-        public static void boom(World world, double x, double y, double z) {
+        public static void playSound(World world, double x, double y, double z) {
             world.playSound(
                     x,
                     y,
@@ -226,7 +217,7 @@ public class Astral implements Ability {
         @Override
         public void affectWorld(boolean particles) {
             if (world.isClient) {
-                boom(world, x, y, z);
+                playSound(world, x, y, z);
             } else {
                 boolean bl = this.shouldDestroy();
                 if (particles) {
@@ -252,11 +243,12 @@ public class Astral implements Ability {
 
                             FallingBlockEntity fall = FallingBlockEntity.spawnFromBlock(world, pos, state);
 
+                            fall.dropItem = false;
                             fall.setVelocity(new Vec3d(
-                                    cause.getX() - fall.getX() + world.getRandom().nextFloat() * 4 - 2,
-                                    cause.getY() - fall.getY() + 3 + world.getRandom().nextFloat() * 4 - 2,
-                                    cause.getZ() - fall.getZ() + world.getRandom().nextFloat() * 4 - 2
-                            ).normalize().multiply(world.getRandom().nextFloat()));
+                                    pos.getX()- x,
+                                    pos.getY() - y,
+                                    pos.getZ() - z
+                            ).multiply(0.1 + world.random.nextFloat() * 0.1));
                             fall.velocityModified = true;
                         }
                     }

@@ -124,8 +124,6 @@ public class Arcanal implements ModInitializer, EntityComponentInitializer {
 		ServerPlayNetworking.registerGlobalReceiver(
 				Skill.CAST_TO_SERVER_PACKET_ID,
 				(server, player, handler, buf, responseSender) -> {
-					LOGGER.info("Received cast packet");
-
 					Ability ability = getAbility(player);
 
 					if (ability != null) {
@@ -162,6 +160,10 @@ public class Arcanal implements ModInitializer, EntityComponentInitializer {
 
 											try {
 												setAbility(Objects.requireNonNull(ctx.getSource().getPlayer()), Ability.ABILITY_MAP.get(type));
+												ctx.getSource().sendFeedback(
+														() -> Text.literal("Set ability to " + getAbility(Objects.requireNonNull(ctx.getSource().getPlayer())).name()),
+														false
+												);
 												return 1;
 											} catch (NullPointerException e) {
 												ctx.getSource().sendFeedback(

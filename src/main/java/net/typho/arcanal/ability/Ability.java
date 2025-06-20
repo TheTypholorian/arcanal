@@ -4,9 +4,10 @@ import dev.onyxstudios.cca.api.v3.component.ComponentV3;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.world.World;
+import net.minecraft.text.Text;
 import net.typho.arcanal.Arcanal;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,6 +36,10 @@ public interface Ability {
             }
         }
 
+        return null;
+    }
+
+    default Text getDeathMessage(LivingEntity killed, LivingEntity killer) {
         return null;
     }
 

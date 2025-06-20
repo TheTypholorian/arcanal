@@ -21,16 +21,16 @@ public class ManaBarRenderer implements HudRenderCallback {
         int x = client.getWindow().getScaledWidth() / 2 - WIDTH / 2;
         int y = client.getWindow().getScaledHeight() / 2 + Y;
 
-        int filled = (int) ((mana / 10) * HEIGHT);
+        int filled = (int) ((mana / 10) * WIDTH);
 
         context.fill(x, y, x + WIDTH, y + HEIGHT, EMPTY.getRGB());
-        context.fill(x, y + HEIGHT, x + filled, y + HEIGHT, FULL.getRGB());
+        context.fill(x, y, x + filled, y + HEIGHT, FULL.getRGB());
 
         context.drawCenteredTextWithShadow(
                 client.textRenderer,
                 Text.literal("Mana (" + (int) (mana / 10 * 100) + "%)"),
                 x + WIDTH / 2,
-                y + HEIGHT / 2,
+                y + 1,
                 Color.WHITE.getRGB()
         );
     }
