@@ -3,7 +3,7 @@
   "key.category.arcanal": "Arcanal",
   "key.arcanal.major": "Major",
   "key.arcanal.minor": "Minor",
-  "key.arcanal.hold": "Hold",
+  "key.arcanal.mobility": "Mobility",
   "death.attack.arcanal.solar_flare": "%1$s flew too close to the sun",
   "death.attack.arcanal.solar_flare.player": "%1$s flew too close to the sun (named %2$s)"
 }

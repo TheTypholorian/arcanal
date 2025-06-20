@@ -3,7 +3,8 @@
   "package": "net.typho.arcanal.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AbilityDeathMessageMixin"
+    "AbilityDeathMessageMixin",
+    "AbilityOnHitMixin"
   ],
   "injectors": {
     "defaultRequire": 1

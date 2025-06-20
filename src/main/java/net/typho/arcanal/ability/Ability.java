@@ -4,6 +4,7 @@ import dev.onyxstudios.cca.api.v3.component.ComponentV3;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -28,6 +29,9 @@ public interface Ability {
     Skill[] skills();
 
     void clientTick(ClientWorld world, ClientPlayerEntity player);
+
+    default void onAttack(PlayerEntity attacker, Entity target) {
+    }
 
     default Skill getSkill(String name) {
         for (Skill skill : skills()) {

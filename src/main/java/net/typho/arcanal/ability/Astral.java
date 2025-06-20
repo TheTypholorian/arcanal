@@ -9,12 +9,15 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
@@ -50,7 +53,7 @@ public class Astral implements Ability {
                 .setColorData(COLOR_DATA);
     }
 
-    public final Skill[] skills = new Skill[2];
+    public final Skill[] skills = new Skill[3];
 
     public Astral() {
         skills[0] = new ShockwaveSkill();
@@ -70,11 +73,17 @@ public class Astral implements Ability {
                 return 5;
             }
         };
+        skills[2] = new GravitySkill();
     }
 
     @Override
-    public Text getDeathMessage(LivingEntity killed, LivingEntity killer) {
-        return killed.getDisplayName().copy().append(Text.literal(" flew too close to the sun"));
+    public String name() {
+        return "astral";
+    }
+
+    @Override
+    public Skill[] skills() {
+        return skills;
     }
 
     @Override
@@ -86,16 +95,22 @@ public class Astral implements Ability {
         while (ArcanalClient.MINOR_KEYBINDING.wasPressed()) {
             skills[1].castToServer();
         }
+
+        while (ArcanalClient.MOBILITY_KEYBINDING.wasPressed()) {
+            skills[2].castToServer();
+        }
     }
 
     @Override
-    public String name() {
-        return "astral";
+    public void onAttack(PlayerEntity attacker, Entity target) {
+        if (target instanceof LivingEntity living) {
+            living.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 100, 0, false, false, true));
+        }
     }
 
     @Override
-    public Skill[] skills() {
-        return skills;
+    public Text getDeathMessage(LivingEntity killed, LivingEntity killer) {
+        return killed.getDisplayName().copy().append(Text.literal(" flew too close to the sun"));
     }
 
     public static class ShockwaveSkill extends Skill {
@@ -254,6 +269,65 @@ public class Astral implements Ability {
                     }
                 }
             }
+        }
+    }
+
+    public static class GravitySkill extends Skill {
+        @Override
+        public float cost() {
+            return 10;
+        }
+
+        @Override
+        public String name() {
+            return "gravity";
+        }
+
+        @Override
+        public boolean cast(World world, PlayerEntity player) {
+            if (!super.cast(world, player)) {
+                return false;
+            }
+
+            List<LivingEntity> pull = world.getEntitiesByClass(LivingEntity.class, new Box(player.getPos().subtract(10, 10, 10), player.getPos().add(10, 10, 10)), e -> e != player);
+
+            if (pull.isEmpty()) {
+                return false;
+            }
+
+            if (world.isClient) {
+                WorldParticleBuilder builder = WorldParticleBuilder.create(LodestoneParticleRegistry.TWINKLE_PARTICLE)
+                        .setRandomOffset(0.25)
+                        .setScaleData(GenericParticleData.create(0.5f, 0.2f, 0f).build())
+                        .setSpinData(SpinParticleData.create(0.1f, 0f).build())
+                        .setColorData(COLOR_DATA)
+                        .enableNoClip();
+
+                for (LivingEntity target : pull) {
+                    Vec3d pos = target.getEyePos();
+                    builder.setMotion(player.getPos().subtract(pos).normalize());
+
+                    for (int i = 0; i < 5; i++) {
+                        builder.spawn(world, pos.x, pos.y, pos.z);
+                    }
+                }
+            } else {
+                for (LivingEntity target : pull) {
+                    target.setVelocity(player.getPos().subtract(target.getEyePos()).normalize());
+                    target.velocityModified = true;
+                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 10, 0, false, false, true));
+
+                    if (target instanceof PlayerEntity steal) {
+                        float targetMana = Arcanal.getMana(steal);
+                        float take = Math.min(targetMana, 1);
+
+                        Arcanal.setMana(steal, targetMana - take);
+                        player.heal(take);
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }
