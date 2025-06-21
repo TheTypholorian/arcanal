@@ -21,6 +21,10 @@ public abstract class AbilityOnHitMixin {
         LivingEntity source = (LivingEntity) (Object) this;
 
         if (source instanceof PlayerEntity player) {
+            if (target instanceof PlayerEntity tp) {
+                Arcanal.getAbility(player).onAttacked(player, tp);
+            }
+
             Arcanal.getAbility(player).onAttack(player, target);
         }
     }
@@ -36,8 +40,8 @@ public abstract class AbilityOnHitMixin {
     private float adjustDamageArg(DamageSource src, float damage) {
         LivingEntity target = (LivingEntity) (Object) this;
 
-        if (src.getAttacker() instanceof PlayerEntity attacker && target.isGlowing() && Arcanal.getAbility(attacker).extraGlowingDamage()) {
-            return damage * 2;
+        if (src.getAttacker() instanceof PlayerEntity attacker) {
+            return Arcanal.getAbility(attacker).getDamage(damage, attacker, target);
         }
 
         return damage;

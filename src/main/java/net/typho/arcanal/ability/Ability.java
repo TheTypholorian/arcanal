@@ -9,32 +9,37 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 import net.typho.arcanal.Arcanal;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 public interface Ability {
-    Map<String, Ability> ABILITY_MAP = new LinkedHashMap<>();
+    Map<String, BiFunction<PlayerEntity, NbtCompound, Ability>> ABILITY_MAP = new LinkedHashMap<>();
 
     static void put(Ability... abilities) {
         for (Ability ability : abilities) {
-            ABILITY_MAP.put(ability.name(), ability);
+            ABILITY_MAP.put(ability.name(), (player, nbt) -> ability);
         }
     }
 
     String name();
 
-    Skill[] skills();
+    Skill[] skills(PlayerEntity player);
 
     void clientTick(ClientWorld world, ClientPlayerEntity player);
 
     default void onAttack(PlayerEntity attacker, Entity target) {
     }
 
-    default Skill getSkill(String name) {
-        for (Skill skill : skills()) {
+    default void onAttacked(PlayerEntity attacker, PlayerEntity target) {
+    }
+
+    default Skill getSkill(PlayerEntity player, String name) {
+        for (Skill skill : skills(player)) {
             if (skill.name().equalsIgnoreCase(name)) {
                 return skill;
             }
@@ -47,8 +52,33 @@ public interface Ability {
         return null;
     }
 
-    default boolean extraGlowingDamage() {
-        return false;
+    default float getDamage(float damage, PlayerEntity attacker, LivingEntity target) {
+        return damage;
+    }
+
+    default boolean regenMana() {
+        return true;
+    }
+
+    default float getMana(PlayerEntity parent, float mana) {
+        return mana;
+    }
+
+    default float setMana(PlayerEntity parent, float mana) {
+        return MathHelper.clamp(mana, 0, getMaxMana(parent));
+    }
+
+    default float getMaxMana(PlayerEntity parent) {
+        return 10;
+    }
+
+    default boolean canCast(PlayerEntity player, Skill skill) {
+        return Arcanal.getMana(player) >= skill.cost();
+    }
+
+    default NbtCompound toNbt(NbtCompound nbt) {
+        nbt.putString("ability", name());
+        return nbt;
     }
 
     class None implements Ability {
@@ -64,7 +94,7 @@ public interface Ability {
         }
 
         @Override
-        public Skill[] skills() {
+        public Skill[] skills(PlayerEntity player) {
             return new Skill[0];
         }
     }
@@ -88,12 +118,12 @@ public interface Ability {
 
         @Override
         public void readFromNbt(@NotNull NbtCompound nbt) {
-            setAbility(ABILITY_MAP.get(nbt.getString("ability")));
+            setAbility(ABILITY_MAP.get(nbt.getString("ability")).apply(parent, nbt));
         }
 
         @Override
         public void writeToNbt(@NotNull NbtCompound nbt) {
-            nbt.putString("ability", ability.name());
+            ability.toNbt(nbt);
         }
     }
 }

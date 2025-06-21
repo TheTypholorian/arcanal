@@ -44,7 +44,7 @@ public class ArcanalClient implements ClientModInitializer {
 
 						if (source instanceof PlayerEntity player) {
 							if (player.getWorld() == client.world) {
-								Arcanal.getAbility(player).getSkill(skillName).cast(player.getWorld(), player);
+								Arcanal.getAbility(player).getSkill(player, skillName).cast(player.getWorld(), player);
 							}
 						}
 					});

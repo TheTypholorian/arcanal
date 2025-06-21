@@ -4,6 +4,6 @@
   "key.arcanal.major": "Major",
   "key.arcanal.minor": "Minor",
   "key.arcanal.mobility": "Mobility",
-  "death.attack.arcanal.solar_flare": "%1$s flew too close to the sun",
-  "death.attack.arcanal.solar_flare.player": "%1$s flew too close to the sun (named %2$s)"
+  "death.arcanal.astral": " flew too close to the sun",
+  "death.arcanal.sacrificial": " sacrificed themself"
 }

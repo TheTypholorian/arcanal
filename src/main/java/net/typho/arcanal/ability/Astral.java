@@ -82,7 +82,7 @@ public class Astral implements Ability {
     }
 
     @Override
-    public Skill[] skills() {
+    public Skill[] skills(PlayerEntity player) {
         return skills;
     }
 
@@ -110,15 +110,19 @@ public class Astral implements Ability {
 
     @Override
     public Text getDeathMessage(LivingEntity killed, LivingEntity killer) {
-        return killed.getDisplayName().copy().append(Text.literal(" flew too close to the sun"));
+        return killed.getDisplayName().copy().append(Text.translatable("death.arcanal.astral"));
     }
 
     @Override
-    public boolean extraGlowingDamage() {
-        return true;
+    public float getDamage(float damage, PlayerEntity attacker, LivingEntity target) {
+        if (target.isGlowing()) {
+            return damage * 2;
+        }
+
+        return damage;
     }
 
-    public static class ShockwaveSkill extends Skill {
+    public static class ShockwaveSkill implements Skill {
         @Override
         public float cost() {
             return 3;
@@ -131,7 +135,7 @@ public class Astral implements Ability {
 
         @Override
         public boolean cast(World world, PlayerEntity player) {
-            if (!super.cast(world, player)) {
+            if (!Skill.super.cast(world, player)) {
                 return false;
             }
 
@@ -277,7 +281,7 @@ public class Astral implements Ability {
         }
     }
 
-    public static class GravitySkill extends Skill {
+    public static class GravitySkill implements Skill {
         @Override
         public float cost() {
             return 10;
@@ -290,7 +294,7 @@ public class Astral implements Ability {
 
         @Override
         public boolean cast(World world, PlayerEntity player) {
-            if (!super.cast(world, player)) {
+            if (!Skill.super.cast(world, player)) {
                 return false;
             }
 

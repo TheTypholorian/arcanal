@@ -5,39 +5,48 @@ import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import dev.onyxstudios.cca.api.v3.component.tick.ServerTickingComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.math.MathHelper;
 import net.typho.arcanal.Arcanal;
 import org.jetbrains.annotations.NotNull;
 
-public class ManaComponent implements ComponentV3, AutoSyncedComponent, ServerTickingComponent {
-    private float mana = 0;
-    private final PlayerEntity parent;
+public interface ManaComponent extends ComponentV3, AutoSyncedComponent, ServerTickingComponent {
+    float getMana();
 
-    public ManaComponent(PlayerEntity parent) {
-        this.parent = parent;
-    }
+    void setMana(float mana);
 
-    public float getMana() {
-        return mana;
-    }
+    class Impl implements ManaComponent {
+        private float mana = 10;
+        private final PlayerEntity parent;
 
-    public void setMana(float mana) {
-        this.mana = MathHelper.clamp(mana, 0, 10);
-        Arcanal.MANA_COMPONENT.sync(parent);
-    }
+        public Impl(PlayerEntity parent) {
+            this.parent = parent;
+        }
 
-    @Override
-    public void readFromNbt(@NotNull NbtCompound nbt) {
-        setMana(nbt.getFloat("mana"));
-    }
+        @Override
+        public float getMana() {
+            return Arcanal.getAbility(parent).getMana(parent, mana);
+        }
 
-    @Override
-    public void writeToNbt(@NotNull NbtCompound nbt) {
-        nbt.putFloat("mana", mana);
-    }
+        @Override
+        public void setMana(float mana) {
+            this.mana = Arcanal.getAbility(parent).setMana(parent, mana);
+            Arcanal.MANA_COMPONENT.sync(parent);
+        }
 
-    @Override
-    public void serverTick() {
-        setMana(getMana() + 0.05f);
+        @Override
+        public void readFromNbt(@NotNull NbtCompound nbt) {
+            setMana(nbt.getFloat("mana"));
+        }
+
+        @Override
+        public void writeToNbt(@NotNull NbtCompound nbt) {
+            nbt.putFloat("mana", getMana());
+        }
+
+        @Override
+        public void serverTick() {
+            if (Arcanal.getAbility(parent).regenMana()) {
+                setMana(getMana() + 0.05f);
+            }
+        }
     }
 }

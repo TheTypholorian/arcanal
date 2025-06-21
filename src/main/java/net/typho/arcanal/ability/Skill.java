@@ -14,28 +14,25 @@ import net.minecraft.world.explosion.Explosion;
 import net.typho.arcanal.Arcanal;
 import team.lodestar.lodestone.systems.particle.builder.WorldParticleBuilder;
 
-public abstract class Skill {
-    public static final Identifier CAST_TO_SERVER_PACKET_ID = new Identifier(Arcanal.MOD_ID, "cast_skill_to_server");
-    public static final Identifier CAST_TO_CLIENT_PACKET_ID = new Identifier(Arcanal.MOD_ID, "cast_skill_to_client");
+public interface Skill {
+    Identifier CAST_TO_SERVER_PACKET_ID = new Identifier(Arcanal.MOD_ID, "cast_skill_to_server");
+    Identifier CAST_TO_CLIENT_PACKET_ID = new Identifier(Arcanal.MOD_ID, "cast_skill_to_client");
 
-    public Skill() {
+    default boolean canCast(PlayerEntity player) {
+        return Arcanal.getAbility(player).canCast(player, this);
     }
 
-    public boolean canCast(PlayerEntity player) {
-        return Arcanal.getMana(player) >= cost();
-    }
+    float cost();
 
-    public abstract float cost();
+    String name();
 
-    public abstract String name();
-
-    public void castToServer() {
+    default void castToServer() {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeString(name());
         ClientPlayNetworking.send(CAST_TO_SERVER_PACKET_ID, buf);
     }
 
-    public boolean cast(World world, PlayerEntity player) {
+    default boolean cast(World world, PlayerEntity player) {
         if (!canCast(player)) {
             return false;
         }
@@ -53,24 +50,24 @@ public abstract class Skill {
         return true;
     }
 
-    public abstract static class Shotgun extends Skill {
-        public abstract WorldParticleBuilder particles();
+    interface Shotgun extends Skill {
+        WorldParticleBuilder particles();
 
-        public abstract int numParticles();
+        int numParticles();
 
         @Override
-        public float cost() {
+        default float cost() {
             return 2f;
         }
 
         @Override
-        public String name() {
+        default String name() {
             return "shotgun";
         }
 
         @Override
-        public boolean cast(World world, PlayerEntity player) {
-            if (!super.cast(world, player)) {
+        default boolean cast(World world, PlayerEntity player) {
+            if (!Skill.super.cast(world, player)) {
                 return false;
             }
 

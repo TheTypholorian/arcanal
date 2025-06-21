@@ -1,7 +1,6 @@
 {
   "exhaustion": 0,
-  "message_id": "arcanal.solar_flare",
+  "message_id": "death.attack.arcanal.sacrificed",
   "scaling": "never",
-  "effects": "burning",
   "death_message_type": "default"
 }
