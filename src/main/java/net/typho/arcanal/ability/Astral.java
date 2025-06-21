@@ -26,11 +26,13 @@ import net.minecraft.world.explosion.ExplosionBehavior;
 import net.typho.arcanal.Arcanal;
 import net.typho.arcanal.ArcanalClient;
 import org.jetbrains.annotations.Nullable;
+import team.lodestar.lodestone.handlers.ScreenshakeHandler;
 import team.lodestar.lodestone.registry.common.particle.LodestoneParticleRegistry;
 import team.lodestar.lodestone.systems.particle.builder.WorldParticleBuilder;
 import team.lodestar.lodestone.systems.particle.data.GenericParticleData;
 import team.lodestar.lodestone.systems.particle.data.color.ColorParticleData;
 import team.lodestar.lodestone.systems.particle.data.spin.SpinParticleData;
+import team.lodestar.lodestone.systems.screenshake.PositionedScreenshakeInstance;
 
 import java.awt.*;
 import java.util.List;
@@ -153,12 +155,12 @@ public class Astral implements Ability {
                 Explosion e = new Astral.Shockwave(world, player, target.x, target.y, target.z, 8, true, Explosion.DestructionType.DESTROY);
                 e.collectBlocksAndDamageEntities();
                 e.affectWorld(false);
+
+                //LodestonePacketRegistry.LODESTONE_CHANNEL.sendToClientsInWorld(new PositionedScreenshakePacket(100, target, 10, 50), (ServerWorld) world);
             } else {
                 len = (float) target.distanceTo(origin);
                 Astral.Shockwave.playSound(world, target.x, target.y, target.z);
-            }
 
-            if (world.isClient) {
                 Vec3d spawn = origin.add(look);
                 Vec3d inc = look.multiply(0.125f);
 
@@ -178,6 +180,8 @@ public class Astral implements Ability {
                     stars.setLifetime(40 + (int) (Math.random() * 20))
                             .spawn(world, target.x, target.y, target.z);
                 }
+
+                ScreenshakeHandler.addScreenshake(new PositionedScreenshakeInstance(40, target, 20, 50).setIntensity(0.5f, 0.1f, 0f));
             }
 
             return true;

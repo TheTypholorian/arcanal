@@ -14,8 +14,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Style;
@@ -68,12 +66,7 @@ public class Arcanal implements ModInitializer, EntityComponentInitializer {
 		player.getComponent(MANA_COMPONENT).setMana(mana);
 	}
 
-	public static final SoundEvent ASTRAL_BOOM_SOUND = SoundEvents.ENTITY_WARDEN_SONIC_BOOM;//sound("supernova");
-
-	private static SoundEvent sound(String name) {
-		Identifier id = new Identifier(MOD_ID, name);
-		return Registry.register(Registries.SOUND_EVENT, id, SoundEvent.of(id));
-	}
+	public static final SoundEvent ASTRAL_BOOM_SOUND = SoundEvents.ENTITY_GENERIC_EXPLODE;
 
 	public static HitResult raycast(World world, Entity entity, double range) {
 		Vec3d posEye = entity.getEyePos();
