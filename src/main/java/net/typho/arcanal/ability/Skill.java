@@ -79,6 +79,10 @@ public interface Skill {
 
         @Override
         default boolean cast(World world, PlayerEntity player) {
+            if (!Skill.super.cast(world, player)) {
+                return false;
+            }
+
             Vec3d origin = player.getPos().add(0, player.getStandingEyeHeight(), 0);
             Vec3d look = player.getRotationVector();
 
