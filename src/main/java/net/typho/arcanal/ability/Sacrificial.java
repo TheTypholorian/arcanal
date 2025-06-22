@@ -7,6 +7,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
+import net.minecraft.world.event.GameEvent;
 import net.typho.arcanal.Arcanal;
 
 import java.util.Objects;
@@ -71,6 +72,11 @@ public class Sacrificial implements Ability {
     @Override
     public float getDamage(float damage, PlayerEntity attacker, LivingEntity target) {
         return copy.getDamage(damage, attacker, target);
+    }
+
+    @Override
+    public boolean cancelsSculk(GameEvent event) {
+        return copy.cancelsSculk(event);
     }
 
     @Override

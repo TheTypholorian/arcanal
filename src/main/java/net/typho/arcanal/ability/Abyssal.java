@@ -60,6 +60,10 @@ public class Abyssal implements Ability {
 
     @Override
     public boolean cancelsSculk(GameEvent event) {
+        if (event == null) {
+            return true;
+        }
+
         return !event.isIn(Arcanal.ABYSSAL_WHITELIST);
     }
 
@@ -179,7 +183,7 @@ public class Abyssal implements Ability {
 
         @Override
         public Text desc() {
-            return Skill.defDesc(cost(), LIGHT, "Shriek", "Activates all sculk sensors within a 64 block radius.");
+            return Skill.defDesc(cost(), LIGHT, "Shriek", "Activates all sculk sensors within a " + Arcanal.ABYSSAL_SHRIEK.getRange() + " block radius.");
         }
 
         @Override
