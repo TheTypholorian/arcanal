@@ -10,6 +10,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -43,6 +44,11 @@ public class Abyssal implements Ability {
     }
 
     @Override
+    public Text desc() {
+        return null;
+    }
+
+    @Override
     public Skill[] skills(PlayerEntity player) {
         return skills;
     }
@@ -63,7 +69,7 @@ public class Abyssal implements Ability {
         }
 
         while (ArcanalClient.MOBILITY_KEYBINDING.wasPressed()) {
-            skills[2].castToServer();
+            //skills[2].castToServer();
         }
     }
 
@@ -74,8 +80,13 @@ public class Abyssal implements Ability {
         }
 
         @Override
+        public Text desc() {
+            return null;
+        }
+
+        @Override
         public Explosion explosion(World world, PlayerEntity player, Vec3d pos) {
-            return new Astral.Shockwave(world, player, pos.x, pos.y, pos.z, 10, false, Explosion.DestructionType.KEEP);
+            return new Astral.Supernova(world, player, pos.x, pos.y, pos.z, 10, false, Explosion.DestructionType.KEEP);
         }
 
         @Override
@@ -97,7 +108,7 @@ public class Abyssal implements Ability {
     public static class SculkCatalystSkill implements Skill {
         @Override
         public float cost() {
-            return 10;
+            return 4;
         }
 
         @Override
@@ -106,8 +117,17 @@ public class Abyssal implements Ability {
         }
 
         @Override
+        public Text desc() {
+            return null;
+        }
+
+        @Override
         public boolean cast(World world, PlayerEntity player) {
             if (!Skill.super.cast(world, player)) {
+                return false;
+            }
+
+            if (player.totalExperience == 0) {
                 return false;
             }
 
@@ -123,7 +143,9 @@ public class Abyssal implements Ability {
             if (!world.isClient) {
                 BlockPos blockPos = new BlockPos((int) Math.floor(target.x), (int) Math.floor(target.y), (int) Math.floor(target.z));
                 ServerWorld serverWorld = (ServerWorld) world;
-                int xpCharge = 100;
+                int xpCharge = Math.min(100, player.totalExperience);
+
+                player.addExperience(-xpCharge);
 
                 SculkSpreadManager spreader = SculkSpreadManager.create();
                 spreader.spread(blockPos, xpCharge);

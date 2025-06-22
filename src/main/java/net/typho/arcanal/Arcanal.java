@@ -10,9 +10,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.command.argument.NbtCompoundArgumentType;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
@@ -20,13 +18,6 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
 import net.typho.arcanal.ability.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,39 +59,6 @@ public class Arcanal implements ModInitializer, EntityComponentInitializer {
 
 	public static final SoundEvent ASTRAL_BOOM_SOUND = SoundEvents.ENTITY_GENERIC_EXPLODE;
 
-	public static HitResult raycast(World world, Entity entity, double range) {
-		Vec3d posEye = entity.getEyePos();
-		Vec3d dirVec = entity.getRotationVector();
-		Vec3d endVec = posEye.add(dirVec.multiply(range));
-		RaycastContext context = new RaycastContext(
-				posEye,
-				endVec,
-				RaycastContext.ShapeType.OUTLINE,
-				RaycastContext.FluidHandling.NONE,
-				entity
-		);
-		BlockHitResult blockHit = world.raycast(context);
-		Box boxArea = entity.getBoundingBox()
-				.stretch(dirVec.multiply(range))
-				.expand(1);
-		EntityHitResult entityHit = ProjectileUtil.getEntityCollision(
-				world,
-				entity,
-				posEye,
-				endVec,
-				boxArea,
-				e -> true
-		);
-
-		if (entityHit != null) {
-			if (entityHit.getPos().squaredDistanceTo(posEye) < blockHit.getPos().squaredDistanceTo(posEye)) {
-				return entityHit;
-			}
-		}
-
-		return blockHit;
-	}
-
 	@Override
 	public void onInitialize() {
 		Ability.put(Ability.None.INSTANCE, Astral.INSTANCE, Abyssal.INSTANCE);
@@ -125,7 +83,7 @@ public class Arcanal implements ModInitializer, EntityComponentInitializer {
 				literal("ability")
 						.executes(ctx -> {
 							ctx.getSource().sendFeedback(
-									() -> Text.literal("Your ability is " + getAbility(Objects.requireNonNull(ctx.getSource().getPlayer())).name()),
+									() -> getAbility(Objects.requireNonNull(ctx.getSource().getPlayer())).desc(),
 									false
 							);
 							return 1;

@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
@@ -29,6 +30,8 @@ public interface Skill {
     float cost();
 
     String name();
+
+    Text desc();
 
     default void castToServer() {
         PacketByteBuf buf = PacketByteBufs.create();

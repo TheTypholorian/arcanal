@@ -27,6 +27,11 @@ public class Sacrificial implements Ability {
     }
 
     @Override
+    public Text desc() {
+        return null;
+    }
+
+    @Override
     public Skill[] skills(PlayerEntity player) {
         return copy.skills(player);
     }

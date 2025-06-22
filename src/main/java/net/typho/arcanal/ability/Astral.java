@@ -14,7 +14,10 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -23,6 +26,7 @@ import net.minecraft.world.explosion.Explosion;
 import net.minecraft.world.explosion.ExplosionBehavior;
 import net.typho.arcanal.Arcanal;
 import net.typho.arcanal.ArcanalClient;
+import net.typho.arcanal.gui.ManaBarRenderer;
 import org.jetbrains.annotations.Nullable;
 import team.lodestar.lodestone.handlers.ScreenshakeHandler;
 import team.lodestar.lodestone.registry.common.particle.LodestoneParticleRegistry;
@@ -56,7 +60,7 @@ public class Astral implements Ability {
     public final Skill[] skills = new Skill[3];
 
     public Astral() {
-        skills[0] = new ShockwaveSkill();
+        skills[0] = new SupernovaSkill();
         skills[1] = new Skill.Shotgun() {
             @Override
             public WorldParticleBuilder particles() {
@@ -79,6 +83,14 @@ public class Astral implements Ability {
             }
 
             @Override
+            public Text desc() {
+                return Text.literal("Solar Flare").setStyle(Style.EMPTY.withColor(LIGHT.getRGB()))
+                        .append(Text.literal(" | ").setStyle(Style.EMPTY.withColor(Formatting.WHITE)))
+                        .append(Text.literal("Cost: " + (int) (cost() * 10) + "%\n").setStyle(Style.EMPTY.withColor(ManaBarRenderer.FULL.getRGB())))
+                        .append(Text.literal("Creates a power 3 explosion that creates fire but doesn't destroy blocks, good in combat.").setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+            }
+
+            @Override
             public Explosion explosion(World world, PlayerEntity player, Vec3d pos) {
                 return new Explosion(world, player, pos.x, pos.y, pos.z, 3, true, Explosion.DestructionType.KEEP);
             }
@@ -89,6 +101,20 @@ public class Astral implements Ability {
     @Override
     public String name() {
         return "astral";
+    }
+
+    @Override
+    public Text desc() {
+        MutableText text = Text.literal("Ability: ").setStyle(Style.EMPTY.withColor(Formatting.WHITE)).append(Text.literal("Astral").setStyle(Style.EMPTY.withColor(LIGHT.getRGB())));
+
+        for (Skill skill : skills) {
+            text.append("\n\n").append(skill.desc());
+        }
+
+        text.append(Text.literal("\n\nPassive").setStyle(Style.EMPTY.withColor(LIGHT.getRGB())))
+                .append(Text.literal("\nInflicts hit entities with the Glowing effect for 1.5 seconds. Attacking a glowing entity causes 2x base damage, buffing combos.").setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+
+        return text;
     }
 
     @Override
@@ -132,21 +158,29 @@ public class Astral implements Ability {
         return damage;
     }
 
-    public static class ShockwaveSkill implements Skill.Missile {
+    public static class SupernovaSkill implements Skill.Missile {
         @Override
         public String name() {
-            return "shockwave";
+            return "supernova";
+        }
+
+        @Override
+        public Text desc() {
+            return Text.literal("Supernova").setStyle(Style.EMPTY.withColor(LIGHT.getRGB()))
+                    .append(Text.literal(" | ").setStyle(Style.EMPTY.withColor(Formatting.WHITE)))
+                    .append(Text.literal("Cost: " + (int) (cost() * 10) + "%\n").setStyle(Style.EMPTY.withColor(ManaBarRenderer.FULL.getRGB())))
+                    .append(Text.literal("Emits a power 8 explosion (creating fire) that converts all exploded blocks to falling blocks, launching them away from the origin. Shooting it at flat surfaces doesn't do much, but shooting in the middle of a structure will obliterate it.").setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
         }
 
         @Override
         public Explosion explosion(World world, PlayerEntity player, Vec3d pos) {
-            return new Astral.Shockwave(world, player, pos.x, pos.y, pos.z, 8, true, Explosion.DestructionType.DESTROY);
+            return new Supernova(world, player, pos.x, pos.y, pos.z, 8, true, Explosion.DestructionType.DESTROY);
         }
 
         @Override
         public boolean castClient(ClientWorld world, ClientPlayerEntity player, Vec3d origin, Vec3d dir, Vec3d target) {
             float len = (float) target.distanceTo(origin);
-            Astral.Shockwave.playSound(world, target.x, target.y, target.z);
+            Supernova.playSound(world, target.x, target.y, target.z);
 
             Vec3d spawn = origin.add(dir);
             Vec3d inc = dir.multiply(0.125f);
@@ -174,12 +208,12 @@ public class Astral implements Ability {
         }
     }
 
-    public static class Shockwave extends Explosion {
+    public static class Supernova extends Explosion {
         public final World world;
         public final double x, y, z;
         public final float power;
 
-        public Shockwave(World world, @Nullable Entity entity, double x, double y, double z, float power, List<BlockPos> affectedBlocks) {
+        public Supernova(World world, @Nullable Entity entity, double x, double y, double z, float power, List<BlockPos> affectedBlocks) {
             super(world, entity, x, y, z, power, affectedBlocks);
             this.world = world;
             this.x = x;
@@ -188,7 +222,7 @@ public class Astral implements Ability {
             this.power = power;
         }
 
-        public Shockwave(World world, @Nullable Entity entity, double x, double y, double z, float power, boolean createFire, DestructionType destructionType, List<BlockPos> affectedBlocks) {
+        public Supernova(World world, @Nullable Entity entity, double x, double y, double z, float power, boolean createFire, DestructionType destructionType, List<BlockPos> affectedBlocks) {
             super(world, entity, x, y, z, power, createFire, destructionType, affectedBlocks);
             this.world = world;
             this.x = x;
@@ -197,7 +231,7 @@ public class Astral implements Ability {
             this.power = power;
         }
 
-        public Shockwave(World world, @Nullable Entity entity, double x, double y, double z, float power, boolean createFire, DestructionType destructionType) {
+        public Supernova(World world, @Nullable Entity entity, double x, double y, double z, float power, boolean createFire, DestructionType destructionType) {
             super(world, entity, x, y, z, power, createFire, destructionType);
             this.world = world;
             this.x = x;
@@ -206,7 +240,7 @@ public class Astral implements Ability {
             this.power = power;
         }
 
-        public Shockwave(World world, @Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, DestructionType destructionType) {
+        public Supernova(World world, @Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, DestructionType destructionType) {
             super(world, entity, damageSource, behavior, x, y, z, power, createFire, destructionType);
             this.world = world;
             this.x = x;
@@ -280,6 +314,14 @@ public class Astral implements Ability {
         @Override
         public String name() {
             return "gravity";
+        }
+
+        @Override
+        public Text desc() {
+            return Text.literal("Gravity").setStyle(Style.EMPTY.withColor(LIGHT.getRGB()))
+                    .append(Text.literal(" | ").setStyle(Style.EMPTY.withColor(Formatting.WHITE)))
+                    .append(Text.literal("Cost: " + (int) (cost() * 10) + "%\n").setStyle(Style.EMPTY.withColor(ManaBarRenderer.FULL.getRGB())))
+                    .append(Text.literal("Pulls all players and mobs within a 10 block square radius towards you, inflicting all with the glowing effect. For all players, 10% mana is taken from them and heals 1 heart for you.").setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
         }
 
         @Override

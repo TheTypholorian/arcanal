@@ -28,6 +28,8 @@ public interface Ability {
 
     String name();
 
+    Text desc();
+
     Skill[] skills(PlayerEntity player);
 
     void clientTick(ClientWorld world, ClientPlayerEntity player);
@@ -95,6 +97,11 @@ public interface Ability {
         @Override
         public String name() {
             return "none";
+        }
+
+        @Override
+        public Text desc() {
+            return null;
         }
 
         @Override
