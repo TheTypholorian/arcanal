@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AbilityDeathMessageMixin",
-    "AbilityOnHitMixin"
+    "AbilityOnHitMixin",
+    "AbilityTriggerSculkMixin"
   ],
   "injectors": {
     "defaultRequire": 1

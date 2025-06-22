@@ -38,6 +38,10 @@ public interface Ability {
     default void onAttacked(PlayerEntity attacker, PlayerEntity target) {
     }
 
+    default boolean cancelsSculk() {
+        return false;
+    }
+
     default Skill getSkill(PlayerEntity player, String name) {
         for (Skill skill : skills(player)) {
             if (skill.name().equalsIgnoreCase(name)) {

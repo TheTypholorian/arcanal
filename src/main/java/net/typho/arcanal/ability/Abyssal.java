@@ -32,6 +32,11 @@ public class Abyssal implements Ability {
     }
 
     @Override
+    public boolean cancelsSculk() {
+        return true;
+    }
+
+    @Override
     public void clientTick(ClientWorld world, ClientPlayerEntity player) {
         while (ArcanalClient.MAJOR_KEYBINDING.wasPressed()) {
             skills[0].castToServer();
