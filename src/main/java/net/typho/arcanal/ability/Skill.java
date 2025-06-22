@@ -9,7 +9,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
@@ -17,7 +19,10 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import net.typho.arcanal.Arcanal;
+import net.typho.arcanal.gui.ManaBarRenderer;
 import team.lodestar.lodestone.systems.particle.builder.WorldParticleBuilder;
+
+import java.awt.*;
 
 public interface Skill {
     Identifier CAST_TO_SERVER_PACKET_ID = new Identifier(Arcanal.MOD_ID, "cast_skill_to_server");
@@ -32,6 +37,13 @@ public interface Skill {
     String name();
 
     Text desc();
+
+    static Text defDesc(float cost, Color header, String name, String desc) {
+        return Text.literal(name).setStyle(Style.EMPTY.withColor(header.getRGB()))
+                .append(Text.literal(" | ").setStyle(Style.EMPTY.withColor(Formatting.WHITE)))
+                .append(Text.literal("Cost: " + (int) (cost * 10) + "%\n").setStyle(Style.EMPTY.withColor(ManaBarRenderer.FULL.getRGB())))
+                .append(Text.literal(desc).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+    }
 
     default void castToServer() {
         PacketByteBuf buf = PacketByteBufs.create();

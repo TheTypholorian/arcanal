@@ -8,11 +8,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.event.GameEvent;
 import net.typho.arcanal.Arcanal;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -30,6 +35,19 @@ public interface Ability {
 
     Text desc();
 
+    static Text defDesc(String name, Color header, Skill[] skills, String passive) {
+        MutableText text = Text.literal("Ability: ").setStyle(Style.EMPTY.withColor(Formatting.WHITE)).append(Text.literal(name).setStyle(Style.EMPTY.withColor(header.getRGB())));
+
+        for (Skill skill : skills) {
+            text.append("\n\n").append(skill.desc());
+        }
+
+        text.append(Text.literal("\n\nPassive").setStyle(Style.EMPTY.withColor(header.getRGB())))
+                .append(Text.literal("\n" + passive).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+
+        return text;
+    }
+
     Skill[] skills(PlayerEntity player);
 
     void clientTick(ClientWorld world, ClientPlayerEntity player);
@@ -40,7 +58,7 @@ public interface Ability {
     default void onAttacked(PlayerEntity attacker, PlayerEntity target) {
     }
 
-    default boolean cancelsSculk() {
+    default boolean cancelsSculk(GameEvent event) {
         return false;
     }
 
@@ -101,7 +119,7 @@ public interface Ability {
 
         @Override
         public Text desc() {
-            return null;
+            return Text.literal("Ability: None\n\nYou have no cool powers.");
         }
 
         @Override

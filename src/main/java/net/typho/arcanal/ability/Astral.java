@@ -14,10 +14,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -26,7 +23,6 @@ import net.minecraft.world.explosion.Explosion;
 import net.minecraft.world.explosion.ExplosionBehavior;
 import net.typho.arcanal.Arcanal;
 import net.typho.arcanal.ArcanalClient;
-import net.typho.arcanal.gui.ManaBarRenderer;
 import org.jetbrains.annotations.Nullable;
 import team.lodestar.lodestone.handlers.ScreenshakeHandler;
 import team.lodestar.lodestone.registry.common.particle.LodestoneParticleRegistry;
@@ -84,10 +80,7 @@ public class Astral implements Ability {
 
             @Override
             public Text desc() {
-                return Text.literal("Solar Flare").setStyle(Style.EMPTY.withColor(LIGHT.getRGB()))
-                        .append(Text.literal(" | ").setStyle(Style.EMPTY.withColor(Formatting.WHITE)))
-                        .append(Text.literal("Cost: " + (int) (cost() * 10) + "%\n").setStyle(Style.EMPTY.withColor(ManaBarRenderer.FULL.getRGB())))
-                        .append(Text.literal("Creates a power 3 explosion that creates fire but doesn't destroy blocks, good in combat.").setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+                return Skill.defDesc(cost(), LIGHT, "Solar Flare", "Creates a power 3 explosion that creates fire but doesn't destroy blocks, good in combat.");
             }
 
             @Override
@@ -105,16 +98,7 @@ public class Astral implements Ability {
 
     @Override
     public Text desc() {
-        MutableText text = Text.literal("Ability: ").setStyle(Style.EMPTY.withColor(Formatting.WHITE)).append(Text.literal("Astral").setStyle(Style.EMPTY.withColor(LIGHT.getRGB())));
-
-        for (Skill skill : skills) {
-            text.append("\n\n").append(skill.desc());
-        }
-
-        text.append(Text.literal("\n\nPassive").setStyle(Style.EMPTY.withColor(LIGHT.getRGB())))
-                .append(Text.literal("\nInflicts hit entities with the Glowing effect for 1.5 seconds. Attacking a glowing entity causes 2x base damage, buffing combos.").setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
-
-        return text;
+        return Ability.defDesc("Astral", LIGHT, skills, "Inflicts hit entities with the Glowing effect for 1.5 seconds. Attacking a glowing entity causes 2x base damage, buffing combos.");
     }
 
     @Override
@@ -166,15 +150,12 @@ public class Astral implements Ability {
 
         @Override
         public Text desc() {
-            return Text.literal("Supernova").setStyle(Style.EMPTY.withColor(LIGHT.getRGB()))
-                    .append(Text.literal(" | ").setStyle(Style.EMPTY.withColor(Formatting.WHITE)))
-                    .append(Text.literal("Cost: " + (int) (cost() * 10) + "%\n").setStyle(Style.EMPTY.withColor(ManaBarRenderer.FULL.getRGB())))
-                    .append(Text.literal("Emits a power 8 explosion (creating fire) that converts all exploded blocks to falling blocks, launching them away from the origin. Shooting it at flat surfaces doesn't do much, but shooting in the middle of a structure will obliterate it.").setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+            return Skill.defDesc(cost(), LIGHT, "Supernova", "Emits a power 6 explosion (creating fire) that converts all exploded blocks to falling blocks, launching them away from the origin. Shooting it at flat surfaces doesn't do much, but shooting in the middle of a structure will obliterate it.");
         }
 
         @Override
         public Explosion explosion(World world, PlayerEntity player, Vec3d pos) {
-            return new Supernova(world, player, pos.x, pos.y, pos.z, 8, true, Explosion.DestructionType.DESTROY);
+            return new Supernova(world, player, pos.x, pos.y, pos.z, 6, true, Explosion.DestructionType.DESTROY);
         }
 
         @Override
@@ -318,10 +299,7 @@ public class Astral implements Ability {
 
         @Override
         public Text desc() {
-            return Text.literal("Gravity").setStyle(Style.EMPTY.withColor(LIGHT.getRGB()))
-                    .append(Text.literal(" | ").setStyle(Style.EMPTY.withColor(Formatting.WHITE)))
-                    .append(Text.literal("Cost: " + (int) (cost() * 10) + "%\n").setStyle(Style.EMPTY.withColor(ManaBarRenderer.FULL.getRGB())))
-                    .append(Text.literal("Pulls all players and mobs within a 10 block square radius towards you, inflicting all with the glowing effect. For all players, 10% mana is taken from them and heals 1 heart for you.").setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+            return Skill.defDesc(cost(), LIGHT, "Gravity", "Pulls all players and mobs within a 10 block square radius towards you, inflicting all with the glowing effect. For all players, 10% mana is taken from them and heals 1 heart for you.");
         }
 
         @Override

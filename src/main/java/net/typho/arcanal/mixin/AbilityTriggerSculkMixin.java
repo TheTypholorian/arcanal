@@ -19,7 +19,7 @@ public class AbilityTriggerSculkMixin {
             cancellable = true
     )
     private void onListen(ServerWorld world, GameEvent event, GameEvent.Emitter emitter, Vec3d pos, CallbackInfoReturnable<Boolean> cir) {
-        if (emitter.sourceEntity() instanceof PlayerEntity player && Arcanal.getAbility(player).cancelsSculk()) {
+        if (emitter.sourceEntity() instanceof PlayerEntity player && Arcanal.getAbility(player).cancelsSculk(event)) {
             cir.setReturnValue(false);
         }
     }

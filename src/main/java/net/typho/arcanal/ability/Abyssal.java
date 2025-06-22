@@ -16,15 +16,19 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
+import net.minecraft.world.event.GameEvent;
 import net.minecraft.world.explosion.Explosion;
+import net.typho.arcanal.Arcanal;
 import net.typho.arcanal.ArcanalClient;
 
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
 public class Abyssal implements Ability {
     public static final Abyssal INSTANCE = new Abyssal();
+    public static final Color LIGHT = new Color(41, 223, 235), DARK = new Color(5, 98, 93);
     public static final List<Supplier<Boolean>> SPREAD_TASKS = new LinkedList<>();
 
     static {
@@ -35,7 +39,8 @@ public class Abyssal implements Ability {
 
     public Abyssal() {
         skills[0] = new SonicBoomSkill();
-        skills[1] = new SculkCatalystSkill();
+        skills[1] = new CatalystSkill();
+        skills[2] = new ShriekSkill();
     }
 
     @Override
@@ -45,7 +50,7 @@ public class Abyssal implements Ability {
 
     @Override
     public Text desc() {
-        return null;
+        return Ability.defDesc("Abyssal", LIGHT, skills, "Sculk sensors will not react to sounds made by you, nor will they carry the signal if you step on them. You'd have to step on a shrieker to activate it. Wardens will not target you. Attacking inflicts darkness for 3 seconds.");
     }
 
     @Override
@@ -54,8 +59,8 @@ public class Abyssal implements Ability {
     }
 
     @Override
-    public boolean cancelsSculk() {
-        return true;
+    public boolean cancelsSculk(GameEvent event) {
+        return !event.isIn(Arcanal.ABYSSAL_WHITELIST);
     }
 
     @Override
@@ -69,7 +74,7 @@ public class Abyssal implements Ability {
         }
 
         while (ArcanalClient.MOBILITY_KEYBINDING.wasPressed()) {
-            //skills[2].castToServer();
+            skills[2].castToServer();
         }
     }
 
@@ -81,12 +86,12 @@ public class Abyssal implements Ability {
 
         @Override
         public Text desc() {
-            return null;
+            return Skill.defDesc(cost(), LIGHT, "Sonic Boom", "Throws a Warden's Sonic Boom in the direction you're looking at, unleashing a 6 power no-fire, no-break explosion at the end.");
         }
 
         @Override
         public Explosion explosion(World world, PlayerEntity player, Vec3d pos) {
-            return new Astral.Supernova(world, player, pos.x, pos.y, pos.z, 10, false, Explosion.DestructionType.KEEP);
+            return new Astral.Supernova(world, player, pos.x, pos.y, pos.z, 6, false, Explosion.DestructionType.KEEP);
         }
 
         @Override
@@ -105,7 +110,7 @@ public class Abyssal implements Ability {
         }
     }
 
-    public static class SculkCatalystSkill implements Skill {
+    public static class CatalystSkill implements Skill {
         @Override
         public float cost() {
             return 4;
@@ -113,12 +118,12 @@ public class Abyssal implements Ability {
 
         @Override
         public String name() {
-            return "sculk_catalyst";
+            return "catalyst";
         }
 
         @Override
         public Text desc() {
-            return null;
+            return Skill.defDesc(cost(), LIGHT, "Catalyst", "Takes up to 100 xp points from you and converts it to sculk at your cursor.");
         }
 
         @Override
@@ -134,7 +139,7 @@ public class Abyssal implements Ability {
             Vec3d origin = player.getEyePos();
             Vec3d look = player.getRotationVector();
 
-            Vec3d target = origin.add(look.multiply(64));
+            Vec3d target = origin.add(look.multiply(16));
             RaycastContext ctx = new RaycastContext(origin, target, RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, player);
             HitResult hit = world.raycast(ctx);
 
@@ -155,6 +160,36 @@ public class Abyssal implements Ability {
 
                     return spreader.getCursors().isEmpty();
                 });
+            }
+
+            return true;
+        }
+    }
+
+    public static class ShriekSkill implements Skill {
+        @Override
+        public float cost() {
+            return 1;
+        }
+
+        @Override
+        public String name() {
+            return "shriek";
+        }
+
+        @Override
+        public Text desc() {
+            return Skill.defDesc(cost(), LIGHT, "Shriek", "Activates all sculk sensors within a 64 block radius.");
+        }
+
+        @Override
+        public boolean cast(World world, PlayerEntity player) {
+            if (!Skill.super.cast(world, player)) {
+                return false;
+            }
+
+            if (!world.isClient) {
+                world.emitGameEvent(Arcanal.ABYSSAL_SHRIEK, player.getPos(), GameEvent.Emitter.of(player));
             }
 
             return true;

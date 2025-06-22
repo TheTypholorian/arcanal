@@ -12,12 +12,17 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.command.argument.NbtCompoundArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.event.GameEvent;
 import net.typho.arcanal.ability.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +36,9 @@ public class Arcanal implements ModInitializer, EntityComponentInitializer {
 	public static final String MOD_ID = "arcanal";
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+	public static final GameEvent ABYSSAL_SHRIEK = new GameEvent("abyssal_shriek", 64);
+	public static final TagKey<GameEvent> ABYSSAL_WHITELIST = TagKey.of(RegistryKeys.GAME_EVENT, new Identifier(MOD_ID, "abyssal_whitelist"));
 
 	public static final ComponentKey<Ability.Component> ABILITY_COMPONENT = ComponentRegistryV3.INSTANCE.getOrCreate(new Identifier(MOD_ID, "ability"), Ability.Component.class);
 	public static final ComponentKey<ManaComponent> MANA_COMPONENT = ComponentRegistryV3.INSTANCE.getOrCreate(new Identifier(MOD_ID, "mana"), ManaComponent.class);
@@ -61,6 +69,7 @@ public class Arcanal implements ModInitializer, EntityComponentInitializer {
 
 	@Override
 	public void onInitialize() {
+		Registry.register(Registries.GAME_EVENT, new Identifier(MOD_ID, ABYSSAL_SHRIEK.getId()), ABYSSAL_SHRIEK);
 		Ability.put(Ability.None.INSTANCE, Astral.INSTANCE, Abyssal.INSTANCE);
 		Ability.ABILITY_MAP.put("sacrificial", Sacrificial::new);
 		ServerPlayNetworking.registerGlobalReceiver(
