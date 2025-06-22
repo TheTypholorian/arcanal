@@ -3,12 +3,16 @@ package net.typho.arcanal.ability;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import net.typho.arcanal.Arcanal;
@@ -50,14 +54,68 @@ public interface Skill {
         return true;
     }
 
-    interface Shotgun extends Skill {
+    interface Missile extends Skill {
+        @Override
+        default float cost() {
+            return 3;
+        }
+
+        @Override
+        default String name() {
+            return "missile";
+        }
+
+        default float maxLen() {
+            return 64;
+        }
+
+        default Explosion explosion(World world, PlayerEntity player, Vec3d pos) {
+            return new Explosion(world, player, pos.x, pos.y, pos.z, 4, false, Explosion.DestructionType.DESTROY);
+        }
+
+        default boolean explosionParticles() {
+            return true;
+        }
+
+        @Override
+        default boolean cast(World world, PlayerEntity player) {
+            Vec3d origin = player.getPos().add(0, player.getStandingEyeHeight(), 0);
+            Vec3d look = player.getRotationVector();
+
+            Vec3d target = origin.add(look.multiply(maxLen()));
+            RaycastContext ctx = new RaycastContext(origin, target, RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, player);
+            HitResult hit = world.raycast(ctx);
+
+            target = hit.getPos();
+
+            if (!world.isClient) {
+                Explosion e = explosion(world, player, target);
+                e.collectBlocksAndDamageEntities();
+                e.affectWorld(explosionParticles());
+
+                return castServer((ServerWorld) world, (ServerPlayerEntity) player, origin, look, target);
+            } else {
+                return castClient((ClientWorld) world, (ClientPlayerEntity) player, origin, look, target);
+            }
+        }
+
+        default boolean castServer(ServerWorld world, ServerPlayerEntity player, Vec3d origin, Vec3d dir, Vec3d target) {
+            return true;
+        }
+
+        default boolean castClient(ClientWorld world, ClientPlayerEntity player, Vec3d origin, Vec3d dir, Vec3d target) {
+            return true;
+        }
+    }
+
+    interface Shotgun extends Missile {
         WorldParticleBuilder particles();
 
         int numParticles();
 
         @Override
         default float cost() {
-            return 2f;
+            return 2;
         }
 
         @Override
@@ -66,32 +124,20 @@ public interface Skill {
         }
 
         @Override
-        default boolean cast(World world, PlayerEntity player) {
-            if (!Skill.super.cast(world, player)) {
-                return false;
-            }
+        default float maxLen() {
+            return 8;
+        }
 
-            Vec3d origin = player.getPos().add(0, player.getStandingEyeHeight(), 0);
-            Vec3d look = player.getRotationVector();
-            float len = 8;
+        @Override
+        default boolean castClient(ClientWorld world, ClientPlayerEntity player, Vec3d origin, Vec3d dir, Vec3d target) {
+            Vec3d spawn = origin.add(dir);
 
-            if (world.isClient) {
-                Vec3d spawn = origin.add(look);
-                look = look.multiply(0.5);
+            WorldParticleBuilder particles = particles()
+                    .setMotion(dir.x * 0.5, dir.y * 0.5, dir.z * 0.5);
 
-                WorldParticleBuilder particles = particles()
-                        .setMotion(look.x, look.y, look.z);
-
-                for (int i = 0; i < numParticles(); i++) {
-                    particles.setLifetime(40 + (int) (Math.random() * 20))
-                            .spawn(world, spawn.x, spawn.y, spawn.z);
-                }
-            } else {
-                HitResult hit = Arcanal.raycast(world, player, len);
-
-                Explosion explosion = new Explosion(world, player, hit.getPos().x, hit.getPos().y, hit.getPos().z, 3, true, Explosion.DestructionType.KEEP);
-                explosion.collectBlocksAndDamageEntities();
-                explosion.affectWorld(false);
+            for (int i = 0; i < numParticles(); i++) {
+                particles.setLifetime(40 + (int) (Math.random() * 20))
+                        .spawn(world, spawn.x, spawn.y, spawn.z);
             }
 
             return true;

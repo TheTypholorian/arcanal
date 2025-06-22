@@ -103,7 +103,7 @@ public class Arcanal implements ModInitializer, EntityComponentInitializer {
 
 	@Override
 	public void onInitialize() {
-		Ability.put(Ability.None.INSTANCE, Astral.INSTANCE);
+		Ability.put(Ability.None.INSTANCE, Astral.INSTANCE, Abyssal.INSTANCE);
 		Ability.ABILITY_MAP.put("sacrificial", Sacrificial::new);
 		ServerPlayNetworking.registerGlobalReceiver(
 				Skill.CAST_TO_SERVER_PACKET_ID,

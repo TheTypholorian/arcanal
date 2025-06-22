@@ -15,11 +15,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import net.minecraft.world.explosion.ExplosionBehavior;
@@ -74,6 +72,16 @@ public class Astral implements Ability {
             public int numParticles() {
                 return 5;
             }
+
+            @Override
+            public String name() {
+                return "solar_flare";
+            }
+
+            @Override
+            public Explosion explosion(World world, PlayerEntity player, Vec3d pos) {
+                return new Explosion(world, player, pos.x, pos.y, pos.z, 3, true, Explosion.DestructionType.KEEP);
+            }
         };
         skills[2] = new GravitySkill();
     }
@@ -124,65 +132,43 @@ public class Astral implements Ability {
         return damage;
     }
 
-    public static class ShockwaveSkill implements Skill {
-        @Override
-        public float cost() {
-            return 3;
-        }
-
+    public static class ShockwaveSkill implements Skill.Missile {
         @Override
         public String name() {
-            return "astral_shockwave";
+            return "shockwave";
         }
 
         @Override
-        public boolean cast(World world, PlayerEntity player) {
-            if (!Skill.super.cast(world, player)) {
-                return false;
+        public Explosion explosion(World world, PlayerEntity player, Vec3d pos) {
+            return new Astral.Shockwave(world, player, pos.x, pos.y, pos.z, 8, true, Explosion.DestructionType.DESTROY);
+        }
+
+        @Override
+        public boolean castClient(ClientWorld world, ClientPlayerEntity player, Vec3d origin, Vec3d dir, Vec3d target) {
+            float len = (float) target.distanceTo(origin);
+            Astral.Shockwave.playSound(world, target.x, target.y, target.z);
+
+            Vec3d spawn = origin.add(dir);
+            Vec3d inc = dir.multiply(0.125f);
+
+            WorldParticleBuilder sparkles = sparkles()
+                    .setScaleData(GenericParticleData.create(0.5f, 0.1f, 0f).build());
+
+            for (float i = 1; i < len; i += 0.125f) {
+                sparkles.setLifetime(40 + (int) (Math.random() * 20))
+                        .spawn(world, spawn.x, spawn.y, spawn.z);
+                spawn = spawn.add(inc);
             }
 
-            Vec3d origin = player.getPos().add(0, player.getStandingEyeHeight(), 0);
-            Vec3d look = player.getRotationVector();
-            float len = 64;
+            WorldParticleBuilder stars = stars()
+                    .setScaleData(GenericParticleData.create(5f, 2f, 0f).build());
 
-            Vec3d target = origin.add(look.multiply(len));
-            RaycastContext ctx = new RaycastContext(origin, target, RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, player);
-            HitResult hit = world.raycast(ctx);
-
-            target = hit.getPos();
-
-            if (!world.isClient) {
-                Explosion e = new Astral.Shockwave(world, player, target.x, target.y, target.z, 8, true, Explosion.DestructionType.DESTROY);
-                e.collectBlocksAndDamageEntities();
-                e.affectWorld(false);
-
-                //LodestonePacketRegistry.LODESTONE_CHANNEL.sendToClientsInWorld(new PositionedScreenshakePacket(100, target, 10, 50), (ServerWorld) world);
-            } else {
-                len = (float) target.distanceTo(origin);
-                Astral.Shockwave.playSound(world, target.x, target.y, target.z);
-
-                Vec3d spawn = origin.add(look);
-                Vec3d inc = look.multiply(0.125f);
-
-                WorldParticleBuilder sparkles = sparkles()
-                        .setScaleData(GenericParticleData.create(0.5f, 0.1f, 0f).build());
-
-                for (float i = 1; i < len; i += 0.125f) {
-                    sparkles.setLifetime(40 + (int) (Math.random() * 20))
-                            .spawn(world, spawn.x, spawn.y, spawn.z);
-                    spawn = spawn.add(inc);
-                }
-
-                WorldParticleBuilder stars = stars()
-                        .setScaleData(GenericParticleData.create(5f, 2f, 0f).build());
-
-                for (int i = 0; i < 5; i++) {
-                    stars.setLifetime(40 + (int) (Math.random() * 20))
-                            .spawn(world, target.x, target.y, target.z);
-                }
-
-                ScreenshakeHandler.addScreenshake(new PositionedScreenshakeInstance(40, target, 20, 50).setIntensity(0.5f, 0.1f, 0f));
+            for (int i = 0; i < 5; i++) {
+                stars.setLifetime(40 + (int) (Math.random() * 20))
+                        .spawn(world, target.x, target.y, target.z);
             }
+
+            ScreenshakeHandler.addScreenshake(new PositionedScreenshakeInstance(40, target, 20, 50).setIntensity(0.5f, 0.1f, 0f));
 
             return true;
         }
