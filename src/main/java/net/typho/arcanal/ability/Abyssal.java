@@ -79,7 +79,7 @@ public class Abyssal implements Ability {
     @Override
     public void onAttack(PlayerEntity attacker, Entity target) {
         if (target instanceof LivingEntity living) {
-            living.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 100, 0));
+            living.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 60, 0));
         }
     }
 
@@ -91,7 +91,7 @@ public class Abyssal implements Ability {
 
         @Override
         public Text desc() {
-            return Skill.defDesc(cost(), LIGHT, "Sonic Boom", "Throws a Warden's Sonic Boom in the direction you're looking at, unleashing a 6 power no-fire, no-break explosion at the end.");
+            return Skill.defDesc(cost(), keybind(), LIGHT, "Sonic Boom", "Throws a Warden's Sonic Boom in the direction you're looking at, unleashing a 6 power no-fire, no-break explosion at the end.");
         }
 
         @Override
@@ -133,7 +133,7 @@ public class Abyssal implements Ability {
 
         @Override
         public Text desc() {
-            return Skill.defDesc(cost(), LIGHT, "Catalyst", "Takes up to 100 xp points from you and converts it to sculk at your cursor.");
+            return Skill.defDesc(cost(), keybind(), LIGHT, "Catalyst", "Takes up to 100 xp points from you and converts it to sculk at your cursor.");
         }
 
         @Override
@@ -184,7 +184,7 @@ public class Abyssal implements Ability {
     public static class ShriekSkill implements Skill {
         @Override
         public float cost() {
-            return 1;
+            return 10;
         }
 
         @Override
@@ -194,7 +194,7 @@ public class Abyssal implements Ability {
 
         @Override
         public Text desc() {
-            return Skill.defDesc(cost(), LIGHT, "Shriek", "Activates all sculk sensors within a " + Arcanal.ABYSSAL_SHRIEK.getRange() + " block radius.");
+            return Skill.defDesc(cost(), keybind(), LIGHT, "Shriek", "Activates all sculk sensors within a " + Arcanal.ABYSSAL_SHRIEK.getRange() + " block radius.");
         }
 
         @Override

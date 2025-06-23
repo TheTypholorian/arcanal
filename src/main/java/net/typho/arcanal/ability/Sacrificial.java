@@ -6,13 +6,17 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.world.event.GameEvent;
 import net.typho.arcanal.Arcanal;
 
+import java.awt.*;
 import java.util.Objects;
 
 public class Sacrificial implements Ability {
+    public static final Color LIGHT = new Color(140, 30, 30), DARK = new Color(90, 20, 20);
     public Ability copy = Astral.INSTANCE;
 
     public Sacrificial(PlayerEntity parent, NbtCompound nbt) {
@@ -29,7 +33,9 @@ public class Sacrificial implements Ability {
 
     @Override
     public Text desc() {
-        return null;
+        return Ability.defDesc("Sacrificial", LIGHT, null, null)
+                .append(Text.literal("\n\nCopies the skills and passive of the last player that hit you. Also, your mana is your health, with 1 heart being 20% mana. This is applied to bonus health. However, it is possible to run out of health this way. Currently copied:\n\n").setStyle(Style.EMPTY.withColor(Formatting.WHITE)))
+                .append(copy.desc());
     }
 
     @Override

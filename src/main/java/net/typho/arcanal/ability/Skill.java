@@ -41,10 +41,12 @@ public interface Skill {
 
     KeyBinding keybind();
 
-    static Text defDesc(float cost, Color header, String name, String desc) {
+    static Text defDesc(float cost, KeyBinding keybind, Color header, String name, String desc) {
         return Text.literal(name).setStyle(Style.EMPTY.withColor(header.getRGB()))
                 .append(Text.literal(" | ").setStyle(Style.EMPTY.withColor(Formatting.WHITE)))
-                .append(Text.literal("Cost: " + (int) (cost * 10) + "%\n").setStyle(Style.EMPTY.withColor(ManaBarRenderer.FULL.getRGB())))
+                .append(Text.literal("Cost: " + (int) (cost * 10) + "%").setStyle(Style.EMPTY.withColor(ManaBarRenderer.FULL.getRGB())))
+                .append(Text.literal(" | ").setStyle(Style.EMPTY.withColor(Formatting.WHITE)))
+                .append(Text.literal("Keybind: ").append(Text.translatable(keybind.getTranslationKey())).append("\n").setStyle(Style.EMPTY.withColor(header.getRGB())))
                 .append(Text.literal(desc).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
     }
 

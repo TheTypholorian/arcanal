@@ -35,15 +35,21 @@ public interface Ability {
 
     Text desc();
 
-    static Text defDesc(String name, Color header, Skill[] skills, String passive) {
+    static MutableText defDesc(String name, Color header, Skill[] skills, String passive) {
         MutableText text = Text.literal("Ability: ").setStyle(Style.EMPTY.withColor(Formatting.WHITE)).append(Text.literal(name).setStyle(Style.EMPTY.withColor(header.getRGB())));
 
-        for (Skill skill : skills) {
-            text.append("\n\n").append(skill.desc());
+        if (skills != null) {
+            for (Skill skill : skills) {
+                if (skill != null) {
+                    text.append("\n\n").append(skill.desc());
+                }
+            }
         }
 
-        text.append(Text.literal("\n\nPassive").setStyle(Style.EMPTY.withColor(header.getRGB())))
-                .append(Text.literal("\n" + passive).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+        if (passive != null) {
+            text.append(Text.literal("\n\nPassive").setStyle(Style.EMPTY.withColor(header.getRGB())))
+                    .append(Text.literal("\n" + passive).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+        }
 
         return text;
     }

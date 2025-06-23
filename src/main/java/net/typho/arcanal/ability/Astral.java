@@ -81,7 +81,7 @@ public class Astral implements Ability {
 
             @Override
             public Text desc() {
-                return Skill.defDesc(cost(), LIGHT, "Solar Flare", "Creates a power 3 explosion that creates fire but doesn't destroy blocks, good in combat.");
+                return Skill.defDesc(cost(), keybind(), LIGHT, "Solar Flare", "Creates a power 3 explosion that creates fire but doesn't destroy blocks, good in combat.");
             }
 
             @Override
@@ -141,7 +141,7 @@ public class Astral implements Ability {
 
         @Override
         public Text desc() {
-            return Skill.defDesc(cost(), LIGHT, "Supernova", "Emits a power 6 explosion (creating fire) that converts all exploded blocks to falling blocks, launching them away from the origin. Shooting it at flat surfaces doesn't do much, but shooting in the middle of a structure will obliterate it.");
+            return Skill.defDesc(cost(), keybind(), LIGHT, "Supernova", "Emits a power 6 explosion (creating fire) that converts all exploded blocks to falling blocks, launching them away from the origin. Shooting it at flat surfaces doesn't do much, but shooting in the middle of a structure will obliterate it.");
         }
 
         @Override
@@ -295,7 +295,7 @@ public class Astral implements Ability {
 
         @Override
         public Text desc() {
-            return Skill.defDesc(cost(), LIGHT, "Gravity", "Pulls all players and mobs within a 10 block square radius towards you, inflicting all with the glowing effect. For all players, 10% mana is taken from them and heals 1 heart for you.");
+            return Skill.defDesc(cost(), keybind(), LIGHT, "Gravity", "Pulls all players and mobs within a 10 block square radius towards you, inflicting all with the glowing effect. For all players, 10% mana is taken from them and heals 1 heart for you.");
         }
 
         @Override
