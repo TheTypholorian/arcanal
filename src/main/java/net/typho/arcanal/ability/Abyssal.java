@@ -1,9 +1,15 @@
 package net.typho.arcanal.ability;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SculkSensorBlock;
+import net.minecraft.block.entity.SculkSensorBlockEntity;
 import net.minecraft.block.entity.SculkSpreadManager;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -13,10 +19,13 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.event.GameEvent;
+import net.minecraft.world.event.Vibrations;
 import net.minecraft.world.explosion.Explosion;
 import net.typho.arcanal.Arcanal;
 import net.typho.arcanal.ArcanalClient;
@@ -27,9 +36,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class Abyssal implements Ability {
-    public static final Abyssal INSTANCE = new Abyssal();
     public static final Color LIGHT = new Color(41, 223, 235), DARK = new Color(5, 98, 93);
     public static final List<Supplier<Boolean>> SPREAD_TASKS = new LinkedList<>();
+    public static final Abyssal INSTANCE = new Abyssal();
 
     static {
         ServerTickEvents.START_SERVER_TICK.register(server -> SPREAD_TASKS.removeIf(Supplier::get));
@@ -68,17 +77,9 @@ public class Abyssal implements Ability {
     }
 
     @Override
-    public void clientTick(ClientWorld world, ClientPlayerEntity player) {
-        while (ArcanalClient.MAJOR_KEYBINDING.wasPressed()) {
-            skills[0].castToServer();
-        }
-
-        while (ArcanalClient.MINOR_KEYBINDING.wasPressed()) {
-            skills[1].castToServer();
-        }
-
-        while (ArcanalClient.MOBILITY_KEYBINDING.wasPressed()) {
-            skills[2].castToServer();
+    public void onAttack(PlayerEntity attacker, Entity target) {
+        if (target instanceof LivingEntity living) {
+            living.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 100, 0));
         }
     }
 
@@ -91,6 +92,11 @@ public class Abyssal implements Ability {
         @Override
         public Text desc() {
             return Skill.defDesc(cost(), LIGHT, "Sonic Boom", "Throws a Warden's Sonic Boom in the direction you're looking at, unleashing a 6 power no-fire, no-break explosion at the end.");
+        }
+
+        @Override
+        public KeyBinding keybind() {
+            return ArcanalClient.KEYBINDING_1;
         }
 
         @Override
@@ -128,6 +134,11 @@ public class Abyssal implements Ability {
         @Override
         public Text desc() {
             return Skill.defDesc(cost(), LIGHT, "Catalyst", "Takes up to 100 xp points from you and converts it to sculk at your cursor.");
+        }
+
+        @Override
+        public KeyBinding keybind() {
+            return ArcanalClient.KEYBINDING_2;
         }
 
         @Override
@@ -187,13 +198,36 @@ public class Abyssal implements Ability {
         }
 
         @Override
+        public KeyBinding keybind() {
+            return ArcanalClient.KEYBINDING_3;
+        }
+
+        @Override
         public boolean cast(World world, PlayerEntity player) {
             if (!Skill.super.cast(world, player)) {
                 return false;
             }
 
             if (!world.isClient) {
-                world.emitGameEvent(Arcanal.ABYSSAL_SHRIEK, player.getPos(), GameEvent.Emitter.of(player));
+                int radius = Arcanal.ABYSSAL_SHRIEK.getRange();
+                BlockPos center = player.getBlockPos();
+                int chunkRadius = (radius >> 4) + 1;
+                int cx = center.getX() >> 4;
+                int cz = center.getZ() >> 4;
+                Box box = new Box(center.getX() - radius, center.getY() - radius, center.getZ() - radius, center.getX() + radius, center.getY() + radius, center.getZ() + radius);
+
+                for (int dx = -chunkRadius; dx <= chunkRadius; dx = dx + 1) {
+                    for (int dz = -chunkRadius; dz <= chunkRadius; dz = dz + 1) {
+                        WorldChunk chunk = world.getChunk(cx + dx, cz + dz);
+
+                        chunk.getBlockEntities().forEach((pos, entity) -> {
+                            if (box.contains(pos.getX(), pos.getY(), pos.getZ()) && entity instanceof SculkSensorBlockEntity) {
+                                BlockState state = world.getBlockState(pos);
+                                ((SculkSensorBlock) state.getBlock()).setActive(player, world, pos, state, 15, Vibrations.getFrequency(Arcanal.ABYSSAL_SHRIEK));
+                            }
+                        });
+                    }
+                }
             }
 
             return true;

@@ -13,8 +13,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(WardenEntity.class)
-public abstract class AbilityWardenFriendlyMixin extends LivingEntity {
-    protected AbilityWardenFriendlyMixin(EntityType<? extends LivingEntity> entityType, World world) {
+public abstract class WardenEntityMixin extends LivingEntity {
+    protected WardenEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
     }
 

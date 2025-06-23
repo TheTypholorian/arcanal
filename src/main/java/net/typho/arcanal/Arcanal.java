@@ -37,7 +37,7 @@ public class Arcanal implements ModInitializer, EntityComponentInitializer {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	public static final GameEvent ABYSSAL_SHRIEK = new GameEvent("abyssal_shriek", 256);
+	public static final GameEvent ABYSSAL_SHRIEK = new GameEvent("abyssal_shriek", 64);
 	public static final TagKey<GameEvent> ABYSSAL_WHITELIST = TagKey.of(RegistryKeys.GAME_EVENT, new Identifier(MOD_ID, "abyssal_whitelist"));
 
 	public static final ComponentKey<Ability.Component> ABILITY_COMPONENT = ComponentRegistryV3.INSTANCE.getOrCreate(new Identifier(MOD_ID, "ability"), Ability.Component.class);

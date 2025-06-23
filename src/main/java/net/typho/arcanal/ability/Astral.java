@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FallingBlockEntity;
@@ -36,9 +37,9 @@ import java.awt.*;
 import java.util.List;
 
 public class Astral implements Ability {
-    public static final Astral INSTANCE = new Astral();
     public static final Color LIGHT = new Color(255, 208, 114), DARK = new Color(229, 143, 57);
     public static final ColorParticleData COLOR_DATA = ColorParticleData.create(Astral.LIGHT, Astral.DARK).build();
+    public static final Astral INSTANCE = new Astral();
 
     public static WorldParticleBuilder sparkles() {
         return WorldParticleBuilder.create(LodestoneParticleRegistry.TWINKLE_PARTICLE)
@@ -84,6 +85,11 @@ public class Astral implements Ability {
             }
 
             @Override
+            public KeyBinding keybind() {
+                return ArcanalClient.KEYBINDING_2;
+            }
+
+            @Override
             public Explosion explosion(World world, PlayerEntity player, Vec3d pos) {
                 return new Explosion(world, player, pos.x, pos.y, pos.z, 3, true, Explosion.DestructionType.KEEP);
             }
@@ -104,21 +110,6 @@ public class Astral implements Ability {
     @Override
     public Skill[] skills(PlayerEntity player) {
         return skills;
-    }
-
-    @Override
-    public void clientTick(ClientWorld world, ClientPlayerEntity player) {
-        while (ArcanalClient.MAJOR_KEYBINDING.wasPressed()) {
-            skills[0].castToServer();
-        }
-
-        while (ArcanalClient.MINOR_KEYBINDING.wasPressed()) {
-            skills[1].castToServer();
-        }
-
-        while (ArcanalClient.MOBILITY_KEYBINDING.wasPressed()) {
-            skills[2].castToServer();
-        }
     }
 
     @Override
@@ -151,6 +142,11 @@ public class Astral implements Ability {
         @Override
         public Text desc() {
             return Skill.defDesc(cost(), LIGHT, "Supernova", "Emits a power 6 explosion (creating fire) that converts all exploded blocks to falling blocks, launching them away from the origin. Shooting it at flat surfaces doesn't do much, but shooting in the middle of a structure will obliterate it.");
+        }
+
+        @Override
+        public KeyBinding keybind() {
+            return ArcanalClient.KEYBINDING_1;
         }
 
         @Override
@@ -300,6 +296,11 @@ public class Astral implements Ability {
         @Override
         public Text desc() {
             return Skill.defDesc(cost(), LIGHT, "Gravity", "Pulls all players and mobs within a 10 block square radius towards you, inflicting all with the glowing effect. For all players, 10% mana is taken from them and heals 1 heart for you.");
+        }
+
+        @Override
+        public KeyBinding keybind() {
+            return ArcanalClient.KEYBINDING_3;
         }
 
         @Override

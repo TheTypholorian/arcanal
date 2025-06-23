@@ -1,8 +1,8 @@
 {
   "key.category.arcanal": "Arcanal",
-  "key.arcanal.major": "Major",
-  "key.arcanal.minor": "Minor",
-  "key.arcanal.mobility": "Mobility",
+  "key.arcanal.1": "Skill 1",
+  "key.arcanal.2": "Skill 2",
+  "key.arcanal.3": "Skill 3",
   "death.arcanal.astral": " flew too close to the sun",
   "death.arcanal.sacrificial": " sacrificed themself"
 }

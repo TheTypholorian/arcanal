@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntity.class)
-public abstract class AbilityOnHitMixin {
+public abstract class LivingEntityMixin {
     @Inject(
             method = "onAttacking",
             at = @At("HEAD")

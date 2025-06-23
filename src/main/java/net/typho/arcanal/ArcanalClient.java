@@ -16,9 +16,9 @@ import org.lwjgl.glfw.GLFW;
 
 public class ArcanalClient implements ClientModInitializer {
 	public static final String KEY_CATEGORY = "key.category." + Arcanal.MOD_ID;
-	public static final KeyBinding MAJOR_KEYBINDING = KeyBindingHelper.registerKeyBinding(new KeyBinding("key." + Arcanal.MOD_ID + ".major", InputUtil.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_4, KEY_CATEGORY));
-	public static final KeyBinding MINOR_KEYBINDING = KeyBindingHelper.registerKeyBinding(new KeyBinding("key." + Arcanal.MOD_ID + ".minor", InputUtil.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_5, KEY_CATEGORY));
-	public static final KeyBinding MOBILITY_KEYBINDING = KeyBindingHelper.registerKeyBinding(new KeyBinding("key." + Arcanal.MOD_ID + ".mobility", InputUtil.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_3, KEY_CATEGORY));
+	public static final KeyBinding KEYBINDING_1 = KeyBindingHelper.registerKeyBinding(new KeyBinding("key." + Arcanal.MOD_ID + ".1", InputUtil.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_4, KEY_CATEGORY));
+	public static final KeyBinding KEYBINDING_2 = KeyBindingHelper.registerKeyBinding(new KeyBinding("key." + Arcanal.MOD_ID + ".2", InputUtil.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_5, KEY_CATEGORY));
+	public static final KeyBinding KEYBINDING_3 = KeyBindingHelper.registerKeyBinding(new KeyBinding("key." + Arcanal.MOD_ID + ".3", InputUtil.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_3, KEY_CATEGORY));
 
 	@Override
 	public void onInitializeClient() {

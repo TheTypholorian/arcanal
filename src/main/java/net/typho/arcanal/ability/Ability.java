@@ -50,7 +50,15 @@ public interface Ability {
 
     Skill[] skills(PlayerEntity player);
 
-    void clientTick(ClientWorld world, ClientPlayerEntity player);
+    default void clientTick(ClientWorld world, ClientPlayerEntity player) {
+        for (Skill skill : skills(player)) {
+            if (skill != null) {
+                while (skill.keybind().wasPressed()) {
+                    skill.castToServer();
+                }
+            }
+        }
+    }
 
     default void onAttack(PlayerEntity attacker, Entity target) {
     }
@@ -107,10 +115,6 @@ public interface Ability {
 
     class None implements Ability {
         public static final None INSTANCE = new None();
-
-        @Override
-        public void clientTick(ClientWorld world, ClientPlayerEntity player) {
-        }
 
         @Override
         public String name() {

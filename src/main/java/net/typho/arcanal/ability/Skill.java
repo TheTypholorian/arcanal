@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
@@ -37,6 +38,8 @@ public interface Skill {
     String name();
 
     Text desc();
+
+    KeyBinding keybind();
 
     static Text defDesc(float cost, Color header, String name, String desc) {
         return Text.literal(name).setStyle(Style.EMPTY.withColor(header.getRGB()))
