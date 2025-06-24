@@ -100,12 +100,11 @@ public class Abyssal implements Ability {
         }
 
         @Override
-        public Explosion explosion(World world, PlayerEntity player, Vec3d pos) {
-            return new Astral.Supernova(world, player, pos.x, pos.y, pos.z, 6, false, Explosion.DestructionType.KEEP);
-        }
-
-        @Override
         public boolean castServer(ServerWorld world, ServerPlayerEntity player, Vec3d origin, Vec3d dir, Vec3d target) {
+            Explosion e = new Astral.Supernova(world, player, target.x, target.y, target.z, 6, false, Explosion.DestructionType.KEEP);
+            e.collectBlocksAndDamageEntities();
+            e.affectWorld(explosionParticles());
+
             Vec3d spawn = origin.add(dir);
             float len = (float) target.distanceTo(spawn);
 

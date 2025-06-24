@@ -89,10 +89,6 @@ public interface Skill {
             return 64;
         }
 
-        default Explosion explosion(World world, PlayerEntity player, Vec3d pos) {
-            return new Explosion(world, player, pos.x, pos.y, pos.z, 4, false, Explosion.DestructionType.DESTROY);
-        }
-
         default boolean explosionParticles() {
             return true;
         }
@@ -113,10 +109,6 @@ public interface Skill {
             target = hit.getPos();
 
             if (!world.isClient) {
-                Explosion e = explosion(world, player, target);
-                e.collectBlocksAndDamageEntities();
-                e.affectWorld(explosionParticles());
-
                 return castServer((ServerWorld) world, (ServerPlayerEntity) player, origin, look, target);
             } else {
                 return castClient((ClientWorld) world, (ClientPlayerEntity) player, origin, look, target);
@@ -124,6 +116,10 @@ public interface Skill {
         }
 
         default boolean castServer(ServerWorld world, ServerPlayerEntity player, Vec3d origin, Vec3d dir, Vec3d target) {
+            Explosion e = new Explosion(world, player, target.x, target.y, target.z, 4, false, Explosion.DestructionType.DESTROY);
+            e.collectBlocksAndDamageEntities();
+            e.affectWorld(explosionParticles());
+
             return true;
         }
 

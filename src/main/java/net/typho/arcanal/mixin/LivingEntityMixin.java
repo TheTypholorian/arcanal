@@ -4,7 +4,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
 import net.typho.arcanal.Arcanal;
+import net.typho.arcanal.ability.Dimensional;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -29,6 +31,21 @@ public abstract class LivingEntityMixin {
         }
     }
 
+    @Inject(
+            method = "applyMovementEffects",
+            at = @At("HEAD")
+    )
+    private void applyMovementEffects(BlockPos pos, CallbackInfo ci) {
+        LivingEntity source = (LivingEntity) (Object) this;
+
+        if (source instanceof PlayerEntity player) {
+            int i = Arcanal.getAbility(player).fireWalkerLevel();
+            if (i > 0) {
+                Dimensional.freezeLava(player, player.getWorld(), pos, i);
+            }
+        }
+    }
+
     @ModifyArg(
             method = "damage(Lnet/minecraft/entity/damage/DamageSource;F)Z",
             at = @At(
@@ -37,7 +54,7 @@ public abstract class LivingEntityMixin {
             ),
             index = 1
     )
-    private float adjustDamageArg(DamageSource src, float damage) {
+    private float damage(DamageSource src, float damage) {
         LivingEntity target = (LivingEntity) (Object) this;
 
         if (src.getAttacker() instanceof PlayerEntity attacker) {

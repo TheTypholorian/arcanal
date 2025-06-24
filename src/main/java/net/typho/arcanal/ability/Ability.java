@@ -76,6 +76,14 @@ public interface Ability {
         return false;
     }
 
+    default boolean isFireImmune() {
+        return false;
+    }
+
+    default int fireWalkerLevel() {
+        return 0;
+    }
+
     default Skill getSkill(PlayerEntity player, String name) {
         for (Skill skill : skills(player)) {
             if (skill.name().equalsIgnoreCase(name)) {
@@ -157,7 +165,13 @@ public interface Ability {
 
         @Override
         public void readFromNbt(@NotNull NbtCompound nbt) {
-            setAbility(ABILITY_MAP.get(nbt.getString("ability")).apply(parent, nbt));
+            var cons = ABILITY_MAP.get(nbt.getString("ability"));
+
+            if (cons == null) {
+                cons = ABILITY_MAP.get("none");
+            }
+
+            setAbility(cons.apply(parent, nbt));
         }
 
         @Override

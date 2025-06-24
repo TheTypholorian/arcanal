@@ -14,6 +14,8 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -90,8 +92,12 @@ public class Astral implements Ability {
             }
 
             @Override
-            public Explosion explosion(World world, PlayerEntity player, Vec3d pos) {
-                return new Explosion(world, player, pos.x, pos.y, pos.z, 3, true, Explosion.DestructionType.KEEP);
+            public boolean castServer(ServerWorld world, ServerPlayerEntity player, Vec3d origin, Vec3d dir, Vec3d target) {
+                Explosion e = new Explosion(world, player, target.x, target.y, target.z, 3, true, Explosion.DestructionType.KEEP);
+                e.collectBlocksAndDamageEntities();
+                e.affectWorld(explosionParticles());
+
+                return true;
             }
         };
         skills[2] = new GravitySkill();
@@ -150,11 +156,6 @@ public class Astral implements Ability {
         }
 
         @Override
-        public Explosion explosion(World world, PlayerEntity player, Vec3d pos) {
-            return new Supernova(world, player, pos.x, pos.y, pos.z, 6, true, Explosion.DestructionType.DESTROY);
-        }
-
-        @Override
         public boolean castClient(ClientWorld world, ClientPlayerEntity player, Vec3d origin, Vec3d dir, Vec3d target) {
             float len = (float) target.distanceTo(origin);
             Supernova.playSound(world, target.x, target.y, target.z);
@@ -180,6 +181,15 @@ public class Astral implements Ability {
             }
 
             ScreenshakeHandler.addScreenshake(new PositionedScreenshakeInstance(40, target, 20, 50).setIntensity(0.5f, 0.1f, 0f));
+
+            return true;
+        }
+
+        @Override
+        public boolean castServer(ServerWorld world, ServerPlayerEntity player, Vec3d origin, Vec3d dir, Vec3d target) {
+            Explosion e = new Supernova(world, player, target.x, target.y, target.z, 6, true, Explosion.DestructionType.DESTROY);
+            e.collectBlocksAndDamageEntities();
+            e.affectWorld(explosionParticles());
 
             return true;
         }

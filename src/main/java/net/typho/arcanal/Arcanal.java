@@ -70,7 +70,7 @@ public class Arcanal implements ModInitializer, EntityComponentInitializer {
 	@Override
 	public void onInitialize() {
 		Registry.register(Registries.GAME_EVENT, new Identifier(MOD_ID, ABYSSAL_SHRIEK.getId()), ABYSSAL_SHRIEK);
-		Ability.put(Ability.None.INSTANCE, Astral.INSTANCE, Abyssal.INSTANCE, Thermal.INSTANCE);
+		Ability.put(Ability.None.INSTANCE, Astral.INSTANCE, Abyssal.INSTANCE, Dimensional.INSTANCE);
 		Ability.ABILITY_MAP.put("sacrificial", Sacrificial::new);
 		ServerPlayNetworking.registerGlobalReceiver(
 				Skill.CAST_TO_SERVER_PACKET_ID,

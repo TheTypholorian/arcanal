@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "DamageSourceMixin",
+    "EntityMixin",
     "LivingEntityMixin",
     "SculkSensorListenerMixin",
     "WardenEntityMixin"
